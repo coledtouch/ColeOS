@@ -19,7 +19,7 @@ if (!CF) {
   // Not configured yet — say so loudly on the run, but don't paint the repo red for a setup step.
   console.log("::warning::CLOUDFLARE_API_TOKEN isn't set on this repo, so the deploy was skipped. "
     + "Add it (and COLEOS_ADMIN_TOKEN) under Settings → Secrets and variables → Actions, e.g. "
-    + "gh secret set CLOUDFLARE_API_TOKEN --repo coledtouch/coleos-site < ~/.coleos/cf-api-token.txt");
+    + "gh secret set CLOUDFLARE_API_TOKEN --repo coledtouch/ColeOS < ~/.coleos/cf-api-token.txt");
   process.exit(0);
 }
 
