@@ -1,0 +1,42 @@
+name: deploy
+
+# Two ways in:
+#   - the Root Console's "Deploy now" button -> workflow_dispatch: applies the
+#     Adviser's staged edits, publishes, and commits them back to main
+#   - any push to main -> publishes HEAD as-is
+# The Cloudflare token lives only in this repo's Actions secrets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      note:
+        description: "What this deploy is"
+        required: false
+        default: "console deploy"
+  push:
+    branches: [main]
+    paths-ignore: ["_src/README.md"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-ciprari-ai
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply staged edits (dispatch only) and publish ciprari.ai
+        run: node _src/ci-deploy.js
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          COLEOS_ADMIN_TOKEN: ${{ secrets.COLEOS_ADMIN_TOKEN }}
+          APPLY_PENDING: ${{ github.event_name == 'workflow_dispatch' }}

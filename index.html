@@ -71,7 +71,7 @@
   "https://www.linkedin.com/in/coleos",
   "https://changelog.ciprari.ai/",
   "https://coenconstruction.com/","https://www.estimate.pro/","https://www.curbscript.com/",
-  "https://thepunchlist.vercel.app/","https://jetdesk.ai/",
+  "https://thepunchlist.vercel.app/","https://www.jetdesk.ai/",
   "https://www.showitwithwords.com/","https://north.construction/","https://valhalla-k9.com/",
   "https://hiremariaelena.com/","https://myaurora.base44.app/",
   "https://hardy-hive-harvest.base44.app/","https://mariaelena.base44.app/"
@@ -1683,6 +1683,8 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
 
 /* adviser chat */
 .r9adv{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.r9trace{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;padding-top:7px;border-top:1px dashed #123c28;font-size:10.5px;color:#4fae7c}
+.r9trace .bad{color:#ff8a8a}
 .r9bub{
   max-width:82%;padding:10px 14px;font-size:12.5px;line-height:1.7;
   border:1px solid #123c28;background:#060f0b;color:#8fffc4;
@@ -1875,7 +1877,7 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
     <li><a href="https://www.estimate.pro/">Estimate.Pro</a> — multi-tenant SaaS estimating suite for 25+ trades with ONNX on-device AR measurement, AI scope drafting, Stripe Connect payouts, SSO and four-tier plans.</li>
     <li><a href="https://www.curbscript.com/">CurbScript</a> — AI SaaS for real-estate agents, 24+ generation tools.</li>
     <li><a href="https://thepunchlist.vercel.app/">The Punchlist</a> — AI automation consultancy platform with an interactive advisor and a 49-industry taxonomy.</li>
-    <li><a href="https://jetdesk.ai/">JetDesk.AI</a> — offline-first flight-planning PWA for a PA-46 turboprop: embedded FAA airport database, winds-aloft-corrected legs, fuel-stop optimizer, live METAR/TAF runway verdicts, and PIN-synced crowd fuel prices on Cloudflare Pages Functions.</li>
+    <li><a href="https://www.jetdesk.ai/">JetDesk.AI</a> — offline-first flight-planning PWA for a PA-46 turboprop: embedded FAA airport database, winds-aloft-corrected legs, fuel-stop optimizer, live METAR/TAF runway verdicts, and PIN-synced crowd fuel prices on Cloudflare Pages Functions.</li>
     <li><a href="https://north.construction/">North Point Construction</a> — programmatic local SEO across 94 towns and 7 counties, plus an AI design-preview lead engine.</li>
     <li><a href="https://valhalla-k9.com/">Valhalla K9 Services</a> — small-business site for a women-owned dog training company in Plymouth, NH: local SEO, service catalog, gallery, reviews and text-first lead capture.</li>
     <li><a href="https://hiremariaelena.com/">Hire Mariaelena</a> — a personal web résumé for an HR generalist: evidence-first structure, capability tags for keyword-scanning recruiters, and Worcester–Boston local SEO.</li>
@@ -2145,7 +2147,7 @@ const PRODUCTS=[
      "<b>Productized pricing</b> — paid audit, fixed-scope build and monthly retainer tiers, outcome-based rather than hourly",
      "Client sign-in and engagement workflow"],
   t:["Next.js","AI/LLM","Interactive Demos","Lead Qualification"]},
- {n:"JetDesk.AI",u:"https://jetdesk.ai/",d:"jetdesk.ai",c:"Aviation / Offline PWA",
+ {n:"JetDesk.AI",u:"https://www.jetdesk.ai/",d:"jetdesk.ai",c:"Aviation / Offline PWA",
   big:"Offline-first flight-planning PWA for a PA-46 turboprop — trip cost, runway and fuel-stop desk.",
   b:"A cockpit-grade planning desk that runs entirely in the browser and keeps working with no signal. The whole US airport system ships inside the app; the live layer adds weather, winds aloft and crowd-shared fuel prices on top.",
   f:["<b>Embedded FAA airport database</b> — every US airport and runway (FAA NASR / OurAirports) inside a single file, so planning still works offline at altitude",
@@ -6339,7 +6341,7 @@ browser:(startQ)=>{
           url.value=u.replace(/^https?:\/\//i,"");
           if(sb[1]) sb[1].textContent=host;
           /* sites that send X-Frame-Options: DENY — show a period-correct notice instead of a dead frame */
-          const NOFRAME=["estimate.pro","www.estimate.pro","myaurora.base44.app","jetdesk.ai","meridian-flight-desk.pages.dev"];
+          const NOFRAME=["estimate.pro","www.estimate.pro","myaurora.base44.app","jetdesk.ai","www.jetdesk.ai","meridian-flight-desk.pages.dev"];
           if(NOFRAME.includes(host)){
             const pi=PRODUCTS.findIndex(x=>x.d===host||x.u.includes(host));
             view.innerHTML=`<div class="webdeny">
@@ -8194,7 +8196,7 @@ const ROOT9={
     }
     main.innerHTML=`
       <div class="r9h">ADVISER</div>
-      <div class="r9sub">your private career adviser — session-gated, never logged to analytics</div>
+      <div class="r9sub">career adviser + root operator — reads traffic, posts, the résumé and the site's source; stages edits you ship from <b>Changes</b>. Session-gated, never logged to analytics.</div>
       <div class="r9adv" id="r9alog"></div>
       <div class="r9row">
         <input class="r9in" id="r9ain" style="flex:1" placeholder="ask about strategy, rates, offers, positioning… (enter to send)" maxlength="4000">
@@ -8208,7 +8210,10 @@ const ROOT9={
       log.innerHTML=this.advLog.length
         ? this.advLog.map(m=>m.role==="user"
             ? `<div class="r9bub me">${esc(m.content)}</div>`
-            : `<div class="r9bub">${this.mdAdv(m.content)}</div>`).join("")
+            : `<div class="r9bub">${this.mdAdv(m.content)}${
+                m.trace&&m.trace.length?`<div class="r9trace">${m.trace.map(t=>
+                  `<span class="${t.ok?"ok":"bad"}" title="${t.ok?"ok":"failed"}">&#9881; ${esc(t.tool)}${t.arg?" "+esc(t.arg):""}</span>`).join("")}</div>`:""}${
+                m.pending?`<div class="r9sub" style="margin-top:7px">${m.pending} staged change${m.pending>1?"s":""} waiting — review and deploy from <b>Changes</b>.</div>`:""}</div>`).join("")
         : '<div class="r9empty">Just us in here, Cole. What are we figuring out today?</div>';
       log.scrollTop=log.scrollHeight;
       try{ main.scrollTop=main.scrollHeight; }catch(e){}
@@ -8230,7 +8235,8 @@ const ROOT9={
           body:JSON.stringify({messages:this.advLog.slice(-24)})});
         const j=await r.json().catch(()=>({}));
         if(r.status===401){ this.login("Session expired. Sign in again."); return; }
-        this.advLog.push({role:"assistant",content:r.ok?(j.reply||"(empty reply)"):("Error: "+(j.error||r.status))});
+        this.advLog.push({role:"assistant",content:r.ok?(j.reply||"(empty reply)"):("Error: "+(j.error||r.status)),
+          trace:Array.isArray(j.trace)?j.trace:[],pending:j.pending||0});
       }catch(e){
         this.advLog.push({role:"assistant",content:"Can't reach the API: "+(e.message||"network error")});
       }finally{
@@ -8259,12 +8265,12 @@ const ROOT9={
       <div class="r9sub">edits the Adviser has staged for ciprari.ai — nothing is live until you deploy</div>
       <div id="r9cl" style="margin-top:12px"><div class="r9empty">loading<span class="cur9"></span></div></div>
       <div class="r9card" style="margin-top:14px">
-        <div class="r9sub" style="margin-bottom:8px"><b style="color:#8fffc4">DEPLOY</b> — publishes every staged change, bumps the service-worker version, then clears the queue. Runs on your machine; the deploy token stays off the public worker.</div>
-        <div class="r9row" style="align-items:stretch;gap:8px">
-          <code class="r9pre" id="r9cmd" style="flex:1;padding:8px 10px;border:1px solid #123c28;background:#060f0b">node deploy/deploy-staged.js</code>
-          <button class="r9btn" id="r9cpy" style="width:auto;min-height:0;padding:6px 12px">Copy</button>
+        <div class="r9sub" style="margin-bottom:8px"><b style="color:#8fffc4">DEPLOY</b> — kicks off the GitHub Action that applies every staged change, publishes ciprari.ai, and commits the result to <b>coen-gpt/coleos-site</b>. The Cloudflare token lives in GitHub's secrets, never on this worker.</div>
+        <div class="r9row" style="gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="r9btn" id="r9dep" style="width:auto;min-height:0;padding:7px 14px">Deploy now</button>
+          <span class="r9sub" id="r9depmsg"></span>
         </div>
-        <div class="r9sub" style="margin-top:6px">Preview first: <b>node deploy/deploy-staged.js --dry</b> applies the diff locally without publishing.</div>
+        <div class="r9sub" style="margin-top:8px">Local fallback: <b>node deploy/deploy-staged.js</b> (<b>--dry</b> previews the diff without publishing).</div>
       </div>
       <div class="r9row" style="margin-top:12px"><button class="r9btn" id="r9crf" style="width:auto;min-height:0;padding:6px 12px">Refresh</button></div>`;
 
@@ -8305,10 +8311,20 @@ const ROOT9={
       });
     };
 
-    const cpy=$("#r9cpy");
-    if(cpy) bindTap(cpy,()=>{
-      try{ navigator.clipboard.writeText("node deploy/deploy-staged.js");
-        cpy.textContent="Copied"; setTimeout(()=>{cpy.textContent="Copy";},1400); }catch(e){}
+    const dep=$("#r9dep"), dmsg=$("#r9depmsg");
+    if(dep) bindTap(dep,async()=>{
+      if(!window.confirm("Deploy every staged change to ciprari.ai now?")) return;
+      dep.disabled=true; dmsg.textContent="dispatching…";
+      try{
+        const r=await AUTH.fetch("/deploy-trigger",{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({note:"console deploy"})});
+        const j=await r.json().catch(()=>({}));
+        if(r.status===401){ this.login("Session expired. Sign in again."); return; }
+        dmsg.innerHTML=r.ok
+          ? `dispatched — <a href="${esc(j.run_url||"https://github.com/coen-gpt/coleos-site/actions")}" target="_blank" rel="noopener" style="color:#7dffb0">watch the run &#8599;</a>. The queue clears when it finishes.`
+          : esc(j.error||("HTTP "+r.status));
+      }catch(e){ dmsg.textContent="Can't reach the API: "+(e.message||"network error"); }
+      finally{ dep.disabled=false; }
     });
     bindTap($("#r9crf"),draw);
     draw();

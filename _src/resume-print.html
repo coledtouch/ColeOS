@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cole Ciprari — Business Systems Architect</title>
+<style>
+  @page {
+    size: Letter;
+    margin: 0.42in 0.55in 0.38in 0.55in;
+    @bottom-center {
+      content: "Cole Ciprari  ·  Business Systems Architect  ·  Page " counter(page) " of " counter(pages);
+      font-family: "DejaVu Sans", sans-serif;
+      font-size: 7pt;
+      color: #94a3b8;
+      padding-top: 6pt;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "DejaVu Sans", "Helvetica", sans-serif;
+    font-size: 7.95pt;
+    line-height: 1.23;
+    color: #1e293b;
+  }
+
+  /* ---------- HEADER ---------- */
+  .name {
+    font-size: 23pt;
+    font-weight: bold;
+    letter-spacing: 2.6pt;
+    color: #0f172a;
+    line-height: 1;
+  }
+  .tagline {
+    font-size: 9.6pt;
+    font-weight: bold;
+    color: #0e7490;
+    letter-spacing: 0.9pt;
+    margin-top: 4pt;
+    text-transform: uppercase;
+  }
+  .contact {
+    font-size: 8.2pt;
+    color: #475569;
+    margin-top: 5pt;
+    padding-bottom: 6pt;
+    border-bottom: 2.2pt solid #0e7490;
+  }
+  .contact a { color: #475569; text-decoration: none; }
+  .contact .site { color: #0e7490; font-weight: bold; }
+
+  /* ---------- SECTIONS ---------- */
+  h2 {
+    font-size: 9pt;
+    letter-spacing: 0.55pt;
+    color: #0e7490;
+    text-transform: uppercase;
+    margin: 6.8pt 0 3.4pt 0;
+    padding-bottom: 2.2pt;
+    border-bottom: 0.7pt solid #cbd5e1;
+  }
+  h2:first-of-type { margin-top: 8pt; }
+
+  .summary { text-align: justify; color: #334155; }
+
+  /* ---------- COMPETENCY GRID ---------- */
+  .grid { display: table; width: 100%; border-spacing: 0; }
+  .grid-row { display: table-row; }
+  .cell {
+    display: table-cell;
+    width: 50%;
+    vertical-align: top;
+    padding: 0 9pt 2.4pt 0;
+  }
+  .cell.right { padding-right: 0; padding-left: 9pt; }
+  .ctitle {
+    font-weight: bold;
+    color: #0f172a;
+    font-size: 8.2pt;
+  }
+  .ctitle::before {
+    content: "";
+    display: inline-block;
+    width: 4.5pt; height: 4.5pt;
+    background: #0e7490;
+    margin-right: 4pt;
+    vertical-align: 1pt;
+  }
+  .cbody { color: #475569; font-size: 8pt; padding-left: 8.5pt; }
+
+  /* ---------- EXPERIENCE ---------- */
+  .job { margin-bottom: 4pt; }
+  .job:last-child { margin-bottom: 2pt; }
+  .jobhead {
+    border-left: 2.4pt solid #0e7490;
+    padding-left: 6pt;
+    margin-bottom: 2.2pt;
+  }
+  .co {
+    font-weight: bold;
+    font-size: 9.6pt;
+    color: #0f172a;
+    letter-spacing: 0.4pt;
+  }
+  .role {
+    font-size: 8.5pt;
+    color: #0e7490;
+    font-weight: bold;
+  }
+  .dates {
+    font-size: 7.9pt;
+    color: #64748b;
+    font-weight: normal;
+  }
+  .scope {
+    font-size: 7.9pt;
+    color: #475569;
+    font-style: italic;
+    margin-top: 1pt;
+  }
+  .scope b { color: #0e7490; font-style: normal; font-weight: bold; }
+  ul { list-style: none; padding-left: 8.5pt; }
+  li {
+    padding-left: 8pt;
+    margin-bottom: 1.5pt;
+    position: relative;
+    text-align: justify;
+  }
+  li::before {
+    content: "\25AA";
+    position: absolute;
+    left: 0;
+    color: #0e7490;
+    font-size: 7.5pt;
+  }
+  li b { color: #0f172a; }
+  li i { color: #64748b; font-style: normal; }
+
+  /* ---------- IMPACT STRIP ---------- */
+  .impact {
+    display: table;
+    width: 100%;
+    border-spacing: 4pt 0;
+    margin: 2pt 0 1pt 0;
+  }
+  .metric {
+    display: table-cell;
+    width: 16.6%;
+    text-align: center;
+    background: #f1f5f9;
+    border-top: 2pt solid #0e7490;
+    padding: 4pt 2pt 4.5pt 2pt;
+  }
+  .mnum {
+    display: block;
+    font-size: 13pt;
+    font-weight: bold;
+    color: #0e7490;
+    line-height: 1.05;
+  }
+  .mlab {
+    display: block;
+    font-size: 6.6pt;
+    color: #475569;
+    letter-spacing: 0.35pt;
+    text-transform: uppercase;
+    margin-top: 2.5pt;
+  }
+
+  /* ---------- STACK ---------- */
+  .stack { display: table; width: 100%; border-spacing: 0 0; }
+  .srow { display: table-row; }
+  .slabel {
+    display: table-cell;
+    width: 23%;
+    font-weight: bold;
+    color: #0e7490;
+    font-size: 7.9pt;
+    padding: 0 6pt 2.0pt 0;
+    vertical-align: top;
+  }
+  .sval {
+    display: table-cell;
+    color: #334155;
+    font-size: 7.9pt;
+    padding-bottom: 2.0pt;
+    vertical-align: top;
+  }
+
+  /* ---------- PRODUCTS ---------- */
+  .sitenote {
+    font-size: 7.9pt; color: #475569; font-style: italic;
+    margin-bottom: 3.5pt;
+  }
+  .sitenote b { color: #0e7490; font-style: normal; }
+  .prod { display:table; width:100%; }
+  .prow { display:table-row; }
+  .pname {
+    display:table-cell; width:23%;
+    font-weight:bold; color:#0f172a; font-size:8.3pt;
+    padding:0 7pt 2.8pt 0; vertical-align:top; line-height:1.25;
+  }
+  .purl {
+    display:block; font-weight:normal; color:#0e7490;
+    font-size:6.7pt; letter-spacing:0; margin-top:1pt;
+    white-space:nowrap; hyphens:none;
+  }
+  .pdesc {
+    display:table-cell; color:#334155; font-size:8.05pt;
+    padding-bottom:2.8pt; vertical-align:top; text-align:justify;
+  }
+  .pdesc b { color:#0f172a; }
+
+  /* ---------- CORE SKILLS BAND (highlighted) ---------- */
+  .corebar { margin: 1pt 0 2pt; }
+  .core {
+    display: inline-block;
+    background: #0e7490; color: #fff;
+    font-size: 7.6pt; font-weight: bold;
+    padding: 2.2pt 5.5pt; margin: 0 2.6pt 2.6pt 0;
+    letter-spacing: .15pt;
+  }
+
+  /* ---------- CERTS ---------- */
+  .certgroup { margin-bottom: 3pt; }
+  .certlabel {
+    font-size: 7.4pt;
+    font-weight: bold;
+    letter-spacing: 0.8pt;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 2.5pt;
+  }
+  .certlist { color: #334155; font-size: 8.3pt; }
+  .certlist b { color: #0f172a; }
+
+  .avoid { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="name">COLE CIPRARI</div>
+<div class="tagline">Business Systems Architect &nbsp;·&nbsp; Operations Technology &amp; AI Automation</div>
+<div class="contact">
+  Worcester, MA &nbsp;|&nbsp; (508) 688-5824 &nbsp;|&nbsp; cole@ciprari.ai &nbsp;|&nbsp; <b class="site">ciprari.ai</b> &nbsp;|&nbsp; linkedin.com/in/coleos
+</div>
+
+<h2>Professional Summary</h2>
+<p class="summary">
+Systems architect who <b>designs the architecture and ships the code</b> — 15+ years scaling the operational systems businesses run on, plus <b>12 production platforms built solo</b>, including a 120-route construction ERP and a multi-tenant SaaS estimating suite serving 25+ trades. Owns the full lifecycle end to end: requirements discovery, platform evaluation, integration and data-model design, build, migration, training, and post-launch adoption measurement. Repeatedly removes manual work at the root — 70% of manual data entry eliminated, 250+ labor hours reclaimed annually, 18% schedule variance reduction — while carrying P&amp;L accountability for portfolios up to $8.5M. Treats agentic AI (Claude Code, OpenAI APIs) as production infrastructure, not novelty.
+</p>
+
+<div class="impact">
+  <div class="metric"><span class="mnum">12</span><span class="mlab">Platforms Built<br>Solo, Shipped</span></div>
+  <div class="metric"><span class="mnum">$8.5M</span><span class="mlab">Portfolio Under<br>Architecture</span></div>
+  <div class="metric"><span class="mnum">3,000+</span><span class="mlab">Users Served By<br>Systems Built</span></div>
+  <div class="metric"><span class="mnum">70%</span><span class="mlab">Manual Entry<br>Eliminated</span></div>
+  <div class="metric"><span class="mnum">240+</span><span class="mlab">Processes<br>Documented</span></div>
+  <div class="metric"><span class="mnum">99.9%</span><span class="mlab">System Uptime<br>Maintained</span></div>
+</div>
+
+<h2>Platforms Architected &amp; Shipped — Solo</h2>
+<p class="sitenote">All twelve are live. Explore them interactively at <b>ciprari.ai</b> — a working desktop environment I built as this résumé's companion.</p>
+<div class="prod">
+  <div class="prow">
+    <div class="pname">Coen Construction Platform<span class="purl">coenconstruction.com</span></div>
+    <div class="pdesc"><b>Full construction ERP + public site — 120+ routes.</b> AI estimating (SOW/MTO generation), AR measure, margin guard, sub bid &amp; onboarding portals, customer e-sign approval, Stripe payments, payroll with ADP mapping, crew scheduling, GPS field/supervisor apps, Twilio dialer &amp; SMS, permit portals, P&amp;L and cash-flow dashboards, plus a complete snow-operations dispatch module (routes, storms, salt, reconciliation, AR).</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Estimate.Pro<span class="purl">estimate.pro</span></div>
+    <div class="pdesc"><b>Multi-tenant SaaS estimating suite for 25+ trades.</b> ONNX on-device AR measurement, AI scope-of-work drafting with per-line confidence scores, Home Depot / Lowe's SKU cost library with price-decay alerts, subcontractor bid portal, white-label proposals, canvas e-signature, Stripe Connect payouts, margin guard, four-tier plans with role permissions and SSO.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">CurbScript<span class="purl">curbscript.com</span></div>
+    <div class="pdesc"><b>AI SaaS for real-estate agents — 24+ generation tools.</b> MLS listing copy in under 30 seconds, AI listing video for TikTok/Instagram, voicemail and SMS scripts, buyer blasts, brand-voice tuning, bulk processing, and team seat management.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">The Punchlist<span class="purl">thepunchlist.ai</span></div>
+    <div class="pdesc"><b>AI automation consultancy platform.</b> Interactive AI advisor that scopes a fix from a plain-English bottleneck, a searchable library of shipped use cases / custom apps / integrations with live UI previews, a 49-industry taxonomy, and productized outcome-based pricing tiers.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Meridian Flight Desk<span class="purl">meridian-flight-desk.pages.dev</span></div>
+    <div class="pdesc"><b>Offline-first flight-planning PWA for a PA-46 Meridian.</b> The full FAA airport and runway database embedded in a single file so planning works with no signal, winds-aloft-corrected legs, fuel-burn and fuel-stop detour optimization, live METAR/TAF runway verdicts, crowd-shared fuel prices synced across devices via a PIN (Cloudflare Pages Functions), and ForeFlight/SkyVector deep links.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">North Point Construction<span class="purl">north.construction</span></div>
+    <div class="pdesc"><b>GC platform with programmatic local SEO</b> across 94 towns and 7 counties, plus a free AI design-preview tool that turns customer photos into concept renders as a lead-generation engine.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Valhalla K9 Services<span class="purl">valhalla-k9.com</span></div>
+    <div class="pdesc"><b>Small-business site for a women-owned dog training company</b> in Plymouth, NH — Lakes Region local SEO, service catalog, gallery, client reviews, and text-first lead capture.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Hire Mariaelena<span class="purl">hiremariaelena.com</span></div>
+    <div class="pdesc"><b>Personal web résumé for an HR generalist</b> — evidence-first structure, a capability tag grid built for keyword-scanning recruiters, Worcester–Boston local SEO, and mobile-first static delivery.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Show It With Words<span class="purl">showitwithwords.com</span></div>
+    <div class="pdesc"><b>E-commerce storefront for a handmade letter-bead bracelet business</b> (on Etsy since 2014) — every product rendered live as procedural SVG, a six-step build-your-own configurator with flat-lay and on-form previews, cart with bundle pricing and provider-ready checkout, and crawlable SPA routing with Store/LocalBusiness structured data.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Aurora<span class="purl">myaurora.base44.app</span></div>
+    <div class="pdesc"><b>IPTV media control center and smart-home orchestration app</b> — streaming player, EPG guide, TV mode, device control, lighting scene automation, and a remote interface.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Northern Hardy Honey<span class="purl">hardy-hive-harvest.base44.app</span></div>
+    <div class="pdesc"><b>E-commerce and education platform</b> for a New England apiary — storefront, checkout, order status tracking, pollination-services booking, and recipe content.</div>
+  </div>
+  <div class="prow">
+    <div class="pname">Mari' Cosmetics<span class="purl">mariaelena.base44.app</span></div>
+    <div class="pdesc"><b>D2C cosmetics storefront</b> with a guided "Find Your Shade" product matcher and editorial looks catalog.</div>
+  </div>
+</div>
+
+<h2>Professional Experience</h2>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">COEN CONSTRUCTION</div>
+    <div class="role">Project Portfolio Manager &nbsp;<span class="dates">| Oct 2025 – Present</span></div>
+    <div class="scope"><b>Scope:</b> Systems &amp; AI Architecture — company-wide platform ownership, $8.5M portfolio</div>
+  </div>
+  <ul>
+    <li><b>Built the Company's Operating System:</b> Architected, developed and deployed <i>coenconstruction.com</i> — a 120+ route construction ERP spanning AI estimating, AR measurement, subcontractor bid and onboarding portals, Stripe payments, ADP-mapped payroll, three role-specific field apps, a full Twilio telephony stack, and P&amp;L/cash-flow dashboards. Sole architect and sole engineer.</li>
+    <li><b>AI &amp; Agent Architecture:</b> Designed the agentic automation tier running on Claude Code and LLM APIs — quantity takeoff analysis, contract and submittal review, scope-gap detection and recurring reporting — <i>compressing multi-hour analyst tasks into minutes</i>. Architected prompts as stateless, reproducible workers with a mandatory human review gate before any write to the system of record.</li>
+    <li><b>Enterprise Platform Architecture:</b> Owned requirements definition, vendor evaluation, data-model configuration, migration and training curriculum for the project-management platform across every team and 15+ concurrent projects; enforced data-integrity controls and instrumented adoption to full utilization.</li>
+    <li><b>Scheduling Systems Design:</b> Built the enterprise Primavera P6 architecture — standardized WBS, activity coding and calendar structures portfolio-wide — <i>reducing schedule variance 18% and lifting on-time delivery to 94%</i>.</li>
+    <li><b>Data &amp; Workflow Architecture:</b> Designed the analytics layer consolidating critical-path performance, cost variance and resource utilization into a single executive view; re-architected change orders from ad-hoc email into a standardized, auditable, gated workflow governing an $8.5M portfolio.</li>
+  </ul>
+</div>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">HANNAFORD BROS. CO., LLC</div>
+    <div class="role">Evening Operations Manager &nbsp;<span class="dates">| Apr 2025 – Aug 2025</span></div>
+    <div class="scope"><b>Scope:</b> Performance Systems Architecture — 10 departments, 40+ users, $250K budget</div>
+  </div>
+  <ul>
+    <li><b>Instrumentation &amp; Telemetry Design:</b> Architected real-time performance tracking across 10 departments and rebuilt shift-handoff protocols as a structured data capture rather than verbal relay — <i>internal audit score 88 → 96 in two months; after-hours incidents down 22%</i>.</li>
+    <li><b>Optimization Modeling:</b> Built a demand-driven labor allocation model on a $250K budget, replacing habit-based scheduling with data — <i>250 hours reclaimed annually, 8% labor reduction</i>; vendor consolidation and renegotiated terms saved $20K/yr with $50K further opportunity identified.</li>
+    <li><b>Rollout &amp; Adoption Engineering:</b> Drove adoption of the new system across 40+ users through transparent metrics dashboards and a fixed stakeholder cadence — treating adoption as the deliverable, not the launch.</li>
+  </ul>
+</div>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">ANDYMAN DESSERT BAKING CO.</div>
+    <div class="role">Operations Manager &nbsp;<span class="dates">| Dec 2023 – Jul 2024</span></div>
+    <div class="scope"><b>Scope:</b> Systems Integration Architecture — POS / inventory / finance data layer</div>
+  </div>
+  <ul>
+    <li><b>Integration Architecture (0→1):</b> Architected and delivered the POS-integrated inventory and financial-reporting system — mapped data flows across point-of-sale, inventory and accounting, normalized the schema, and chose an integration layer over a three-system replacement. <i>Eliminated 70% of manual data entry</i> and shipped a real-time executive dashboard for inventory position and cash flow.</li>
+    <li><b>Automated Decision Support:</b> Built the tracking and monitoring layer on top of the new data model — <i>inventory turns +12%, waste −9%</i>; a margin-aware pricing model designed against the resulting visibility <i>lifted revenue 18% while protecting margin</i>.</li>
+    <li><b>Governance &amp; Control Design:</b> Authored and enforced a 40-SOP control framework across food safety, compliance and cash handling with versioned updates — <i>zero compliance lapses, perfect 100 health-inspection score</i>.</li>
+    <li><b>Infrastructure Delivery:</b> Ran a $120K capital build from planning to handover — timeline design, vendor management, milestone tracking — delivered under budget and on schedule, unlocking a new revenue stream.</li>
+  </ul>
+</div>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">NAPLES PIZZERIA</div>
+    <div class="role">Managing Partner &nbsp;<span class="dates">| Feb 2020 – Jan 2023</span></div>
+    <div class="scope"><b>Scope:</b> Systems &amp; Automation Ownership — cloud HR stack, $1.2M P&amp;L</div>
+  </div>
+  <ul>
+    <li><b>Cloud Systems Migration:</b> Evaluated, selected and deployed a cloud-based ATS with standardized, automated onboarding workflows — <i>hiring cycle compressed 10 days → 3 days, new-hire ramp time cut 65%</i> across a 25-person team.</li>
+    <li><b>Algorithmic Incentive Design:</b> Architected a performance-based compensation model tying individual payout directly to measured business-growth targets — a rules engine rather than discretionary bonuses — <i>turnover down 35%</i>.</li>
+    <li><b>Commercial Systems &amp; P&amp;L:</b> Full P&amp;L ownership of a $1.2M unit; <i>scaled revenue $650K → $900K with 15% YoY margin expansion</i>. Implemented vendor-managed inventory (VMI) contracts to automate replenishment, <i>cutting annual food costs 12%</i>; zero permitting or licensing lapses.</li>
+  </ul>
+</div>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">TSD RENTAL, LLC</div>
+    <div class="role">Operations Manager / Strategic Planning Lead &nbsp;<span class="dates">| Jul 2014 – Feb 2020</span></div>
+    <div class="scope"><b>Scope:</b> IT Infrastructure &amp; Systems Architecture — 2 sites, $1M assets, $400K budget</div>
+  </div>
+  <ul>
+    <li><b>IT Infrastructure Architecture:</b> Led CAPEX IT infrastructure programs across two commercial facilities from architecture through execution — vendor selection, integration sequencing, capacity planning and resource allocation for multi-site expansion.</li>
+    <li><b>Single-Source-of-Truth Design:</b> Consolidated a fragmented software-licensing and vendor-contract estate into one tracked registry with automated renewal monitoring and standardized pricing, eliminating two operating silos — <i>$30K annual savings with continuous audit readiness</i>.</li>
+    <li><b>Reporting &amp; Metrics Architecture:</b> Built the multi-site operating-metrics dashboard covering revenue, asset utilization, labor cost and compliance — the first apples-to-apples comparison between facilities and the leadership decision baseline. P&amp;L for $1M in assets on a $400K budget — <i>98% asset utilization, $75K annual efficiency gains</i>.</li>
+  </ul>
+</div>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">LIBERTY MUTUAL INSURANCE</div>
+    <div class="role">Operations Process Improvement Specialist &nbsp;<span class="dates">| Jan 2010 – Jul 2014</span></div>
+    <div class="scope"><b>Scope:</b> Automation &amp; Enterprise Knowledge Architecture — 200+ processes, 3,000+ users</div>
+  </div>
+  <ul>
+    <li><b>Automation Architecture (Pre-LLM):</b> Designed and implemented the RPA and workflow-automation program across claims operations — identified the highest-volume, most error-prone steps, redesigned the underlying workflow, then automated it. <i>Errors reduced 15%, process cycle time improved 22%</i>. Same discipline I now apply with agentic AI; the tooling changed, the architecture did not.</li>
+    <li><b>Enterprise Knowledge Architecture:</b> Owned the divisional knowledge base of 200+ processes serving <i>3,000+ users at &gt;99.9% uptime</i> — governed versioning, regulatory compliance and change rollout at enterprise scale.</li>
+    <li><b>Observability &amp; Continuous Improvement:</b> Built the automated metrics framework tracking cycle time, error rate and productivity, replacing manual status collection with live instrumentation; facilitated cross-functional Kaizen events that fed the automation backlog.</li>
+  </ul>
+</div>
+
+<div class="job avoid">
+  <div class="jobhead">
+    <div class="co">EARLY CAREER</div>
+    <div class="role">Sales, Recruiting &amp; IT Foundations &nbsp;<span class="dates">| Nov 2002 – Dec 2009</span></div>
+  </div>
+  <ul>
+    <li><b>Exsos LLC — Senior Account Executive, IT Staffing</b> (Andover, MA · Jan 2008 – Dec 2009): Built the TD Banknorth relationship single-handed through the Commerce Bank merger, supplying qualified IT candidates to integrate their financial systems; clients included Millipore, Harvard Business School, F5 Networks, TripAdvisor and Iron Mountain; ran recruiting operations on the Bullhorn ATS.</li>
+    <li><b>Technology Seed, LLC — IT Technician / Support, Contract</b> (Londonderry, NH · Sep 2008 – Mar 2009): First- and second-level support across Windows Server 2003, Exchange 2007, Active Directory, DNS/DHCP, VOIP telephony and Cisco networking; managed backup processes and network expansion.</li>
+    <li><b>Datamonitor — Senior Account Executive, Healthcare/Pharma</b> (New York, NY · Jan 2005 – Jan 2008): <i>$275K+ per quarter in new business</i>; prospected and closed Pfizer, AstraZeneca, Stryker and DeRoyal; worked directly with analysts to map product coverage to each client's actual gaps — needs analysis before the pitch.</li>
+    <li><b>Bad Boy Entertainment &amp; Sean John Clothing — Marketing/Promotions</b> (New York, NY · Nov 2002 – Jan 2005): Artist logistics, event coordination and VIP handling for the label's roster; built the custom spreadsheets that tracked the marketing department's spend.</li>
+  </ul>
+</div>
+
+<h2>Core Skills</h2>
+<div class="corebar">
+  <span class="core">Complex Business Systems</span><span class="core">Systems &amp; Integration Architecture</span><span class="core">Entity Schema &amp; Data Modelling</span><span class="core">Agentic AI in Production</span><span class="core">Multi-Tenant SaaS</span><span class="core">Full-Stack Delivery</span><span class="core">RPA &amp; Workflow Automation</span><span class="core">P&amp;L Ownership</span><span class="core">Adoption &amp; Change Management</span>
+</div>
+
+<h2>Technical Skills — Applied, Not Aspirational</h2>
+<div class="stack">
+  <div class="srow">
+    <div class="slabel">AI &amp; Agentic</div>
+    <div class="sval"><b>Claude &amp; Claude Code</b> (certified) · <b>OpenAI API</b> (certified architect) · Google Gemini · Perplexity · agentic workflow design · prompt &amp; context engineering · stateless reproducible prompt workers · human-in-the-loop review gates · LLM document &amp; data extraction · AI image and video generation</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Architecture</div>
+    <div class="sval"><b>Complex business systems</b> spanning finance, field ops, HR, compliance and customers · integration-layer design over rip-and-replace · entity schema &amp; data modelling · state machines · single-source-of-truth design · API contract design · multi-tenant tenancy models · role-based access control · SSO (Okta, Azure AD, Google)</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Product Engineering</div>
+    <div class="sval">React · Next.js · JavaScript · HTML/CSS · REST APIs · webhooks · <b>Stripe</b> &amp; <b>Stripe Connect</b> · <b>Twilio</b> voice, SMS &amp; voicemail (branded calling LOA) · <b>ADP</b> payroll mapping · <b>ONNX</b> on-device computer vision (AR measurement) · e-signature &amp; document generation · <b>offline-first PWAs</b> &amp; service workers · procedural SVG/canvas rendering · <b>iOS app build &amp; App Store submission</b></div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Low-Code / Rapid</div>
+    <div class="sval"><b>Base44</b> — entity schema design, record CRUD, connector integrations, multi-page routing, deployment (3 apps shipped) · Vercel · rapid prototyping to production</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Cloud &amp; Infra</div>
+    <div class="sval"><b>Cloudflare</b> Workers, D1 (SQLite), Pages + Pages Functions, DNS, Registrar, Email Routing, WAF · SQL &amp; schema migrations · Git / GitHub · CI-style deploy pipelines · CAPEX IT infrastructure planning · multi-site network &amp; systems buildout</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Automation</div>
+    <div class="sval"><b>Robotic Process Automation (RPA)</b> · Zapier · API orchestration · scheduled reporting pipelines · lead-scraper and triage automation · dispatch &amp; routing automation · renewal-tracking automation</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Project &amp; Portfolio</div>
+    <div class="sval"><b>Primavera P6</b> (enterprise WBS, activity coding, calendars) · Microsoft Project · <b>Procore</b> · Buildern · <b>Jobber</b> · Contractor Foreman · BuilderTrend · critical-path &amp; time-impact analysis · cost loading · change-order control</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Data &amp; BI</div>
+    <div class="sval">Advanced Excel modelling · Google Sheets · <b>Looker Studio</b> / Google Data Studio · KPI &amp; dashboard architecture · SQL querying · variance &amp; margin analysis · business-case &amp; ROI modelling · <b>Google Analytics 4</b> · web analytics</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Enterprise Systems</div>
+    <div class="sval">ERP · POS integration · <b>QuickBooks</b> · HRIS · ATS · inventory management · contract &amp; vendor management platforms · Google Workspace · Microsoft 365</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Growth &amp; Marketing</div>
+    <div class="sval"><b>Programmatic SEO at scale</b> (94 towns, 7 counties) · local schema &amp; structured data · Google Ads · Google Tag Manager · Angi lead pipelines · email campaign automation with performance benchmarking · review capture · conversion-focused landing architecture</div>
+  </div>
+  <div class="srow">
+    <div class="slabel">Operations</div>
+    <div class="sval"><b>Lean / Kaizen</b> · Six Sigma principles · root-cause analysis · <b>SOP authoring at scale</b> (240+ processes) · change management &amp; training curriculum design · UAT &amp; adoption measurement · demand-driven labour modelling · vendor negotiation &amp; VMI contracts · compliance &amp; audit readiness · P&amp;L management to $8.5M</div>
+  </div>
+</div>
+
+<h2>Certifications &amp; Credentials</h2>
+<div class="certgroup">
+  <div class="certlabel">Completed</div>
+  <div class="certlist">
+    <b>Claude Code Certified</b> — Anthropic &nbsp;·&nbsp; <b>OpenAI Certified Architect</b> — OpenAI
+  </div>
+</div>
+<div class="certgroup">
+  <div class="certlabel">In Progress — Target Q3/Q4 2026</div>
+  <div class="certlist">
+    Google Cloud <b>Generative AI Fundamentals</b> skill badge &nbsp;·&nbsp; Google Cloud <b>Introduction to Large Language Models</b> &amp; <b>Responsible AI</b> &nbsp;·&nbsp; Google Cloud <b>Agentic AI</b> &nbsp;·&nbsp; <b>Google Analytics 4 (GA4) Certification</b> — Google Skillshop &nbsp;·&nbsp; <b>Automation Anywhere RPA Essentials</b> &nbsp;·&nbsp; <b>Kaggle</b> Python, SQL &amp; Intro to Machine Learning
+  </div>
+</div>
+
+<h2>How I Work</h2>
+<div class="grid">
+  <div class="grid-row">
+    <div class="cell">
+      <div class="ctitle">I Architect It and I Build It</div>
+      <div class="cbody">Twelve production platforms shipped solo, from a 120-route ERP to a multi-tenant SaaS suite. I don't hand specs to a team and hope — I can take a system from whiteboard to deployed.</div>
+    </div>
+    <div class="cell right">
+      <div class="ctitle">Adoption Is the Deliverable</div>
+      <div class="cbody">A system nobody uses is a failed project. I design the training, change management, and success metrics alongside the architecture — never after it.</div>
+    </div>
+  </div>
+  <div class="grid-row">
+    <div class="cell">
+      <div class="ctitle">Every Build Carries a Business Case</div>
+      <div class="cbody">Architecture justified in P&amp;L terms and measured after launch. I have owned the budget, not just the implementation — which changes what you're willing to build.</div>
+    </div>
+    <div class="cell right">
+      <div class="ctitle">AI Needs a Review Gate</div>
+      <div class="cbody">Agentic automation is production infrastructure, not a demo — but only when a human approves anything that reaches the system of record.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

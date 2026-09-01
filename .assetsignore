@@ -5,3 +5,6 @@
 **/desktop.ini
 *.tmp
 *.bak
+# sources and CI — version-controlled, never published
+_src/
+.github/
