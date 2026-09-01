@@ -8265,7 +8265,7 @@ const ROOT9={
       <div class="r9sub">edits the Adviser has staged for ciprari.ai — nothing is live until you deploy</div>
       <div id="r9cl" style="margin-top:12px"><div class="r9empty">loading<span class="cur9"></span></div></div>
       <div class="r9card" style="margin-top:14px">
-        <div class="r9sub" style="margin-bottom:8px"><b style="color:#8fffc4">DEPLOY</b> — kicks off the GitHub Action that applies every staged change, publishes ciprari.ai, and commits the result to <b>coen-gpt/coleos-site</b>. The Cloudflare token lives in GitHub's secrets, never on this worker.</div>
+        <div class="r9sub" style="margin-bottom:8px"><b style="color:#8fffc4">DEPLOY</b> — kicks off the GitHub Action that applies every staged change, publishes ciprari.ai, and commits the result to <b>coledtouch/coleos-site</b>. The Cloudflare token lives in GitHub's secrets, never on this worker.</div>
         <div class="r9row" style="gap:10px;align-items:center;flex-wrap:wrap">
           <button class="r9btn" id="r9dep" style="width:auto;min-height:0;padding:7px 14px">Deploy now</button>
           <span class="r9sub" id="r9depmsg"></span>
@@ -8321,7 +8321,7 @@ const ROOT9={
         const j=await r.json().catch(()=>({}));
         if(r.status===401){ this.login("Session expired. Sign in again."); return; }
         dmsg.innerHTML=r.ok
-          ? `dispatched — <a href="${esc(j.run_url||"https://github.com/coen-gpt/coleos-site/actions")}" target="_blank" rel="noopener" style="color:#7dffb0">watch the run &#8599;</a>. The queue clears when it finishes.`
+          ? `dispatched — <a href="${esc(j.run_url||"https://github.com/coledtouch/coleos-site/actions")}" target="_blank" rel="noopener" style="color:#7dffb0">watch the run &#8599;</a>. The queue clears when it finishes.`
           : esc(j.error||("HTTP "+r.status));
       }catch(e){ dmsg.textContent="Can't reach the API: "+(e.message||"network error"); }
       finally{ dep.disabled=false; }
