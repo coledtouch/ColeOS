@@ -7526,6 +7526,7 @@ const ROOT9={
           <button data-v="system">System</button>
           <div class="grp">TOOLS</div>
           <button data-v="advisor">Adviser</button>
+          <button data-v="changes">Changes</button>
           <button data-v="compose">Compose</button>
           <button data-v="sql">Query</button>
         </nav>
@@ -7543,6 +7544,7 @@ const ROOT9={
           <button data-v="notes">Notes</button>
           <button data-v="system">System</button>
           <button data-v="advisor">Adviser</button>
+          <button data-v="changes">Changes</button>
           <button data-v="sql">Query</button>
         </div>
       </div>
@@ -7617,7 +7619,7 @@ const ROOT9={
       analytics:()=>this.vAnalytics(main), uptime:()=>this.vUptime(main),
       ai:()=>this.vAI(main), notes:()=>this.vNotes(main),
       subs:()=>this.vSubs(main), news:()=>this.vNews(main),
-      advisor:()=>this.vAdvisor(main),
+      advisor:()=>this.vAdvisor(main), changes:()=>this.vChanges(main),
       sql:()=>this.vSql(main)}[this.view]||(()=>this.vOverview(main)))();
   },
 
@@ -8249,6 +8251,67 @@ const ROOT9={
     $("#r9ain").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); send(); } });
     draw();
     setTimeout(()=>{ try{ $("#r9ain").focus(); }catch(e){} },90);
+  },
+
+  vChanges(main){
+    main.innerHTML=`
+      <div class="r9h">STAGED CHANGES</div>
+      <div class="r9sub">edits the Adviser has staged for ciprari.ai — nothing is live until you deploy</div>
+      <div id="r9cl" style="margin-top:12px"><div class="r9empty">loading<span class="cur9"></span></div></div>
+      <div class="r9card" style="margin-top:14px">
+        <div class="r9sub" style="margin-bottom:8px"><b style="color:#8fffc4">DEPLOY</b> — publishes every staged change, bumps the service-worker version, then clears the queue. Runs on your machine; the deploy token stays off the public worker.</div>
+        <div class="r9row" style="align-items:stretch;gap:8px">
+          <code class="r9pre" id="r9cmd" style="flex:1;padding:8px 10px;border:1px solid #123c28;background:#060f0b">node deploy/deploy-staged.js</code>
+          <button class="r9btn" id="r9cpy" style="width:auto;min-height:0;padding:6px 12px">Copy</button>
+        </div>
+        <div class="r9sub" style="margin-top:6px">Preview first: <b>node deploy/deploy-staged.js --dry</b> applies the diff locally without publishing.</div>
+      </div>
+      <div class="r9row" style="margin-top:12px"><button class="r9btn" id="r9crf" style="width:auto;min-height:0;padding:6px 12px">Refresh</button></div>`;
+
+    const draw=async()=>{
+      let pending=[];
+      try{
+        const r=await AUTH.fetch("/pending");
+        if(r.status===401){ this.login("Session expired. Sign in again."); return; }
+        if(r.ok) pending=(await r.json()).pending||[];
+      }catch(e){}
+      const box=$("#r9cl"); if(!box) return;
+      if(!pending.length){ box.innerHTML='<div class="r9empty">Queue is clean — no staged changes. Ask the Adviser to make one, then come back here to review and deploy.</div>'; return; }
+      box.innerHTML=`<div class="r9row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="r9sub">${pending.length} staged change${pending.length>1?"s":""} · waiting for deploy</span>
+          <button class="r9btn r9dall" style="width:auto;min-height:0;padding:5px 10px;font-size:11px">Discard all</button></div>`
+        + pending.map(p=>{
+            const preview=p.kind==="write"
+              ? `new file · ${(p.new||"").length} chars`
+              : `<span style="color:#ff8a8a">- ${esc((p.old||"").slice(0,160))}${(p.old||"").length>160?"…":""}</span>\n<span style="color:#7dffb0">+ ${esc((p.new||"").slice(0,160))}${(p.new||"").length>160?"…":""}</span>`;
+            return `<div class="r9card" style="margin-bottom:8px">
+              <div class="r9row" style="justify-content:space-between;align-items:center;gap:8px">
+                <span style="min-width:0"><span class="r9tag">${esc(p.kind)}</span> <b style="color:#8fffc4;font-size:12px;word-break:break-all">${esc(p.path)}</b></span>
+                <button class="r9btn r9disc" data-id="${p.id}" style="width:auto;min-height:0;padding:5px 10px;font-size:11px;flex:none">Discard</button>
+              </div>
+              ${p.note?`<div class="r9sub" style="margin:6px 0 2px">${esc(p.note)}</div>`:""}
+              <pre class="r9pre" style="margin-top:6px;max-height:170px;overflow:auto">${preview}</pre>
+            </div>`;
+          }).join("");
+      box.querySelectorAll(".r9disc").forEach(b=>bindTap(b,async()=>{
+        await AUTH.fetch("/discard",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:+b.dataset.id})});
+        draw();
+      }));
+      const dall=box.querySelector(".r9dall");
+      if(dall) bindTap(dall,async()=>{
+        if(!window.confirm("Discard all staged changes? This cannot be undone.")) return;
+        await AUTH.fetch("/discard",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:"all"})});
+        draw();
+      });
+    };
+
+    const cpy=$("#r9cpy");
+    if(cpy) bindTap(cpy,()=>{
+      try{ navigator.clipboard.writeText("node deploy/deploy-staged.js");
+        cpy.textContent="Copied"; setTimeout(()=>{cpy.textContent="Copy";},1400); }catch(e){}
+    });
+    bindTap($("#r9crf"),draw);
+    draw();
   },
 
   vSql(main){
