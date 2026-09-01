@@ -3,7 +3,7 @@
  * Strategy is deliberately split:
  *
  *   HTML  → network first, cache as fallback.
- *     The whole app is one 650 KB index.html that changes on every deploy. If it
+ *     The whole app is one ~475 KB index.html that changes on every deploy. If it
  *     were served cache-first, visitors would sit on a stale build until the cache
  *     expired — which is exactly the sort of bug that wastes an afternoon. Network
  *     first means an update always lands the moment you are online, and the cached
@@ -13,7 +13,7 @@
  *     Icons, the PDF and the OG image are content-addressed by deploy, so serving
  *     them from cache instantly is safe.
  */
-const VERSION = "ded18f1e4377";
+const VERSION = "4bf232d2f697";
 const SHELL = "coleos-shell-" + VERSION;
 const ASSETS = "coleos-assets-" + VERSION;
 
