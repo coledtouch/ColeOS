@@ -1,0 +1,7 @@
+**/.git
+**/.gitignore
+.assetsignore
+**/Thumbs.db
+**/desktop.ini
+*.tmp
+*.bak
