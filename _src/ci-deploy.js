@@ -103,6 +103,10 @@ async function deployAssets(dir) {
     console.log(`  edit   ${e.path} — ${e.note || ""}`);
   }
 
+  // Platform counts are derived from PRODUCTS, never hand-edited (idempotent when nothing changed).
+  try { console.log(execSync("node _src/sync-count.js", { cwd: SITE, encoding: "utf8" }).trim()); }
+  catch (e) { console.error("sync-count failed: " + (e.stdout || e.message)); process.exit(1); }
+
   console.log("sw.js VERSION", stampSW(SITE));
   await deployAssets(SITE);
   if (edits.length) await fetch(`${API}/deployed`, { method: "POST", headers: { authorization: "Bearer " + ADMIN } });

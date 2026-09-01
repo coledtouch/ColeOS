@@ -14,8 +14,15 @@ Everything in this folder is version-controlled but excluded from the site deplo
 
 ## Adding a platform (the whole checklist, now)
 
+**From the Root Console:** tell the Adviser to add it. Its `add_project` tool stages the
+`PRODUCTS` entry plus every hand-written list (JSON-LD sameAs, noscript, terminal listing,
+bookmarks, `resume.html`, `ask/what-has-cole-built.html`) in one call, and the deploy step
+runs `sync-count.js` itself, so every count updates on its own. Review in Changes → Deploy now.
+
+**By hand:**
+
 1. Add the entry to `PRODUCTS` in `index.html` (and a `SITES` line in the worker for uptime).
-2. `node _src/sync-count.js ../coleos-api/src/worker.js` — fixes every count.
-3. Add the project's line to `resume.html`, `_src/resume-print.html`, `ask/what-has-cole-built.html` and the noscript list (prose, not counts — those are the only hand edits left).
+2. Counts fix themselves at deploy (`ci-deploy.js` and `deploy-staged.js` both run `sync-count.js`). To sync the worker too, run `node _src/sync-count.js ../coleos-api/src/worker.js` locally.
+3. Add the project's line to `resume.html`, `_src/resume-print.html`, `ask/what-has-cole-built.html`, the noscript list and the ColeAI "all live:" sentence (prose, not counts).
 4. `python3 _src/make_og.py` and `bash _src/make_pdf.sh` (WSL).
 5. Commit, push → the Action deploys. Or `node deploy/deploy-site.js`.
