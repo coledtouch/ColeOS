@@ -8272,7 +8272,59 @@ const ROOT9={
         </div>
         <div class="r9sub" style="margin-top:8px">Local fallback: <b>node deploy/deploy-staged.js</b> (<b>--dry</b> previews the diff without publishing).</div>
       </div>
+      <div class="r9h" style="margin-top:22px">STAGED POSTS</div>
+      <div class="r9sub">changelog posts the Adviser has written — nothing is published until you press Publish</div>
+      <div id="r9pl" style="margin-top:12px"><div class="r9empty">loading<span class="cur9"></span></div></div>
+      <div class="r9card" style="margin-top:14px">
+        <div class="r9sub" style="margin-bottom:8px"><b style="color:#8fffc4">PUBLISH</b> — kicks off the changelog's GitHub Action in <b>coledtouch/ciprari.ai</b>: it validates every staged post with the writer's own rules, builds, deploys changelog.ciprari.ai, and commits the post back. The newsletter and LinkedIn pick it up from the feed as usual.</div>
+        <div class="r9row" style="gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="r9btn" id="r9pub" style="width:auto;min-height:0;padding:7px 14px">Publish post</button>
+          <span class="r9sub" id="r9pubmsg"></span>
+        </div>
+      </div>
       <div class="r9row" style="margin-top:12px"><button class="r9btn" id="r9crf" style="width:auto;min-height:0;padding:6px 12px">Refresh</button></div>`;
+
+    const drawPosts=async()=>{
+      let posts=[];
+      try{
+        const r=await AUTH.fetch("/pending-posts");
+        if(r.status===401){ this.login("Session expired. Sign in again."); return; }
+        if(r.ok) posts=(await r.json()).posts||[];
+      }catch(e){}
+      const box=$("#r9pl"); if(!box) return;
+      if(!posts.length){ box.innerHTML='<div class="r9empty">No staged posts. Ask the Adviser to write one — a project launch, a build note, a rollout — then review it here.</div>'; return; }
+      const words=s=>String(s||"").replace(/<[^>]+>/g," ").split(/\s+/).filter(Boolean).length;
+      box.innerHTML=posts.map(p=>`<div class="r9card" style="margin-bottom:8px">
+          <div class="r9row" style="justify-content:space-between;align-items:center;gap:8px">
+            <span style="min-width:0"><span class="r9tag">${p.rollout?"rollout":"post"}</span> <b style="color:#8fffc4;font-size:12px">${esc(p.title)}</b></span>
+            <button class="r9btn r9pdisc" data-id="${p.id}" style="width:auto;min-height:0;padding:5px 10px;font-size:11px;flex:none">Discard</button>
+          </div>
+          <div class="r9sub" style="margin:6px 0 2px">${words(p.body_html)} words · ${esc(p.keywords||"")} · staged ${esc(p.created||"")}</div>
+          <div class="r9sub" style="margin:4px 0">${esc(p.desc||"")}</div>
+          <details style="margin-top:6px"><summary class="r9sub" style="cursor:pointer">read the draft</summary>
+            <div class="r9sub" style="margin-top:8px;line-height:1.55;max-height:360px;overflow:auto">${String(p.body_html||"").replace(/<script[\s\S]*?<\/script>/gi,"")}</div>
+          </details>
+        </div>`).join("");
+      box.querySelectorAll(".r9pdisc").forEach(b=>bindTap(b,async()=>{
+        if(!window.confirm("Discard this staged post?")) return;
+        await AUTH.fetch("/discard-post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:+b.dataset.id})});
+        drawPosts();
+      }));
+    };
+    const pub=$("#r9pub"), pmsg=$("#r9pubmsg");
+    if(pub) bindTap(pub,async()=>{
+      if(!window.confirm("Publish every staged post to changelog.ciprari.ai now?")) return;
+      pub.disabled=true; pmsg.textContent="dispatching…";
+      try{
+        const r=await AUTH.fetch("/post-trigger",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({note:"console publish"})});
+        const j=await r.json().catch(()=>({}));
+        if(r.status===401){ this.login("Session expired. Sign in again."); return; }
+        pmsg.innerHTML=r.ok
+          ? `dispatched — <a href="${esc(j.run_url||"https://github.com/coledtouch/ciprari.ai/actions")}" target="_blank" rel="noopener" style="color:#7dffb0">watch the run &#8599;</a>. The post leaves this list when it's live.`
+          : esc(j.error||("HTTP "+r.status));
+      }catch(e){ pmsg.textContent="Can't reach the API: "+(e.message||"network error"); }
+      finally{ pub.disabled=false; }
+    });
 
     const draw=async()=>{
       let pending=[];
@@ -8326,8 +8378,8 @@ const ROOT9={
       }catch(e){ dmsg.textContent="Can't reach the API: "+(e.message||"network error"); }
       finally{ dep.disabled=false; }
     });
-    bindTap($("#r9crf"),draw);
-    draw();
+    bindTap($("#r9crf"),()=>{ draw(); drawPosts(); });
+    draw(); drawPosts();
   },
 
   vSql(main){
