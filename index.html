@@ -1612,6 +1612,16 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
 .r9h{font-size:14px;color:#8fffc4;letter-spacing:2px;margin-bottom:3px}
 .r9sub{font-size:10.5px;color:#3f8f66;margin-bottom:14px;letter-spacing:.6px}
 
+/* Console readability and keyboard access, retaining the phosphor theme. */
+#root9 .r9sub,#root9 .r9tbl .dim,#root9 .r9card .n,#root9 .r9empty{color:#75a78b}
+#root9 .r9nav .grp{color:#709a80}
+#root9 button:focus-visible,#root9 select:focus-visible{outline:2px solid #8fffc4;outline-offset:3px}
+.r9tablewrap{overflow-x:auto}
+.r9maillink{font:inherit;color:#8fffc4;background:none;border:0;padding:0;text-align:left;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.r9tablewrap .r9tbl{min-width:540px}
+#root9 #r9mailq{min-width:220px}
+@media(max-width:600px){#root9 #r9mailq{flex-basis:100%!important}}
+#root9 .r9msg{text-align:left}
 /* stat tiles */
 .r9grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px;margin-bottom:16px}
 .r9card{border:1px solid #123c28;background:#060f0b;padding:11px 12px}
@@ -7456,7 +7466,7 @@ const ROOT9={
     clearInterval(this.poll); this.poll=null;
     document.documentElement.style.overflow="";
   },
-  logout(){ AUTH.clear(); this.data=[]; this.login(); },
+  logout(){ AUTH.clear(); this.data=[]; this.drafts={}; this.replyTo=null; this.login(); },
 
   /* ---------------- login ---------------- */
   login(msg){
@@ -7581,6 +7591,8 @@ const ROOT9={
   },
 
   async refresh(spin){
+    if(this.refreshing) return;
+    this.refreshing=true;
     const main=$("#r9main");
     if(spin&&main) main.innerHTML=`<div class="r9empty">loading<span class="cur9"></span></div>`;
     try{
@@ -7589,23 +7601,34 @@ const ROOT9={
         fetch(EP()+"/health").catch(()=>null)
       ]);
       if(mr.status===401){ this.login("Session expired. Sign in again."); return; }
+      if(!mr.ok) throw new Error("Messages unavailable (HTTP "+mr.status+"). Try refreshing.");
       const j=await mr.json();
+      if(main!==$("#r9main") || !AUTH.in) return;
       this.data=Array.isArray(j)?j:(j.messages||[]);
       this.health=hr?await hr.json().catch(()=>null):null;
     }catch(e){
       this.health=null;
-      if(spin&&main) main.innerHTML=`<div class="r9empty">Can't reach the API. ${esc(e.message||"")}</div>`;
-    }
+      if(spin&&main){
+        main.innerHTML=`<div class="r9empty" role="alert">Can't refresh messages. ${esc(e.message||"")}</div><button class="r9btn" id="r9retry">Retry</button>`;
+        bindTap(main.querySelector("#r9retry"),()=>this.refresh(true));
+      }
+      return;
+    }finally{ this.refreshing=false; }
     const dot=$("#r9dot");
     if(dot) dot.className="r9dot"+(this.health&&this.health.ok?"":" bad");
     /* A quiet background poll must never repaint the adviser: it would rebuild the
        view mid-conversation and an in-flight reply would render into a detached
        node — invisible. The adviser redraws itself; leave it alone. */
-    if(spin||this.view!=="advisor") this.paint();
+    /* Poll updates cached data only. Never replace an editor, selection or armed action. */
+    if(spin) this.paint();
   },
 
   paint(){
     const main=$("#r9main"); if(!main) return;
+    this.node.querySelectorAll("button[data-v]").forEach(b=>{
+      if(b.dataset.v===this.view) b.setAttribute("aria-current","page");
+      else b.removeAttribute("aria-current");
+    });
     this.node.querySelectorAll(".r9nav button").forEach(b=>
       b.classList.toggle("on",b.dataset.v===this.view));
     const dockSet=["overview","analytics","inbox","news"];
@@ -7686,27 +7709,42 @@ const ROOT9={
   },
 
   vList(main,which){
-    const rows=this.data.filter(m=>which==="sent"?m.kind==="sent":m.kind!=="sent");
+    const sent=which==="sent";
     main.innerHTML=`
-      <div class="r9h">${which==="sent"?"SENT":"INBOX"}</div>
-      <div class="r9sub">${rows.length} message(s)${which==="inbox"?" · unread in green":""}</div>
-      ${rows.length?`<table class="r9tbl"><thead><tr>
-        <th style="width:74px">When</th><th style="width:96px">Kind</th>
-        <th>${which==="sent"?"To":"From"}</th><th>Subject</th><th style="width:78px">State</th></tr></thead><tbody>
-        ${rows.map(m=>`<tr data-id="${m.id}" style="cursor:pointer">
-          <td class="dim">${esc(this.ago(m.created_at))}</td>
-          <td><span class="r9tag ${esc(m.kind)}">${esc(m.kind)}</span></td>
-          <td class="${m.read_at||m.kind==="sent"?"":"r9new"}">${
-            /* in Sent, the useful name is the recipient — not my own */
-            esc(m.kind==="sent"?(m.email||"unknown"):(m.name||m.email||"unknown"))}</td>
-          <td>${esc((m.subject||"(no subject)").slice(0,64))}</td>
-          <td class="dim">${m.kind==="sent"?"—":(m.replied_at?"replied":(m.read_at?"read":"NEW"))}</td>
-        </tr>`).join("")}
-      </tbody></table>`:'<div class="r9empty">Nothing here.</div>'}
+      <div class="r9h">${sent?"SENT":"INBOX"}</div>
+      <div class="r9sub">Search messages, open a conversation, or start a reply.</div>
+      <div class="r9row">
+        <input class="r9in" id="r9mailq" type="search" style="flex:1" aria-label="Search messages" placeholder="Search name, email, subject or message">
+        <select class="r9in" id="r9mailfilter" aria-label="Filter messages">
+          <option value="all">All messages</option>${sent?"":'<option value="unread">Unread</option><option value="reply">Awaiting reply</option>'}
+        </select>
+        <button class="r9btn" id="r9mailnew">Compose</button>
+        <button class="r9btn" id="r9mailrefresh">Refresh</button>
+      </div>
+      <div class="r9sub" id="r9mailcount" role="status"></div>
+      <div class="r9tablewrap" id="r9mailrows"></div>
       <div id="r9read" style="margin-top:16px"></div>`;
-
-    main.querySelectorAll("tbody tr").forEach(tr=>
-      bindTap(tr,()=>this.read(+tr.dataset.id)));
+    const draw=()=>{
+      const q=main.querySelector("#r9mailq").value.trim().toLowerCase();
+      const filter=main.querySelector("#r9mailfilter").value;
+      const rows=this.data.filter(m=>(sent?m.kind==="sent":m.kind!=="sent") &&
+        (filter!=="unread"||!m.read_at) && (filter!=="reply"||!m.replied_at) &&
+        (!q||[m.name,m.email,m.subject,m.message].some(v=>String(v||"").toLowerCase().includes(q))));
+      main.querySelector("#r9mailcount").textContent=rows.length+" matching message"+(rows.length===1?"":"s");
+      const box=main.querySelector("#r9mailrows");
+      box.innerHTML=rows.length?`<table class="r9tbl"><thead><tr><th>When</th><th>${sent?"To":"From"}</th><th>Subject</th><th>State</th></tr></thead><tbody>
+        ${rows.map(m=>`<tr><td class="dim">${esc(this.ago(m.created_at))}</td>
+          <td class="${m.read_at||sent?"":"r9new"}">${esc(sent?m.email:(m.name||m.email))}</td>
+          <td><button class="r9maillink" data-id="${m.id}">${esc(m.subject||"(no subject)")}</button></td>
+          <td class="dim">${sent?"sent":m.replied_at?"replied":m.read_at?"read":"NEW"}</td></tr>`).join("")}
+        </tbody></table>`:'<div class="r9empty">No messages match. Try another search or filter.</div>';
+      box.querySelectorAll("button[data-id]").forEach(b=>bindTap(b,()=>this.read(+b.dataset.id)));
+    };
+    main.querySelector("#r9mailq").addEventListener("input",draw);
+    main.querySelector("#r9mailfilter").addEventListener("change",draw);
+    bindTap(main.querySelector("#r9mailnew"),()=>{this.replyTo=null;this.view="compose";this.paint();});
+    bindTap(main.querySelector("#r9mailrefresh"),async()=>{await this.refresh(false);if(main.isConnected) draw();});
+    draw();
   },
 
   async read(id){
@@ -7722,9 +7760,16 @@ const ROOT9={
     if(m.kind!=="sent"){
       bindTap($("#r9rep"),()=>{ this.replyTo=m; this.view="compose"; this.paint(); });
       if(!m.read_at){
-        m.read_at="now";
-        try{ await AUTH.fetch("/read",{method:"POST",
-          headers:{"Content-Type":"application/json"},body:JSON.stringify({id})}); }catch(e){}
+        try{
+          const r=await AUTH.fetch("/read",{method:"POST",
+            headers:{"Content-Type":"application/json"},body:JSON.stringify({id})});
+          if(!r.ok) throw new Error("Could not mark this message as read.");
+          m.read_at=new Date().toISOString();
+        }catch(e){
+          const notice=document.createElement("div"); notice.className="r9msg";
+          notice.setAttribute("role","status"); notice.textContent="Message opened, but read status was not saved. Reopen to retry.";
+          box.appendChild(notice);
+        }
       }
     }
     /* older Safari lacks the options form; never let a nicety break reading */
@@ -7733,29 +7778,45 @@ const ROOT9={
 
   vCompose(main){
     const m=this.replyTo;
+    const key=m?String(m.id):"new";
+    this.drafts=this.drafts||{};
+    const draft=this.drafts[key];
     main.innerHTML=`
       <div class="r9h">${m?"REPLY":"COMPOSE"}</div>
       <div class="r9sub">sends as cole@ciprari.ai via Cloudflare Email Sending</div>
-      <div class="r9row"><input class="r9in" id="r9to" style="flex:1" placeholder="to@example.com"
+      <div class="r9row"><input class="r9in" id="r9to" type="email" aria-label="Recipient email" style="flex:1" placeholder="to@example.com"
         value="${m?esc(m.email||""):""}"></div>
-      <div class="r9row"><input class="r9in" id="r9subj" style="flex:1" placeholder="Subject"
+      <div class="r9row"><input class="r9in" id="r9subj" aria-label="Subject" style="flex:1" placeholder="Subject"
         value="${m?esc(/^re:/i.test(m.subject||"")?m.subject:"Re: "+(m.subject||"")):""}"></div>
-      <textarea class="r9in" id="r9body" style="width:100%;height:230px;resize:vertical"
+      <textarea class="r9in" id="r9body" aria-label="Message" style="width:100%;height:230px;resize:vertical"
         placeholder="Message…">${m?esc("\n\nOn "+this.when(m.created_at)+", "+(m.name||m.email)+" wrote:\n"+
           String(m.message||"").split("\n").map(l=>"> "+l).join("\n")):""}</textarea>
       <div class="r9row" style="margin-top:11px">
         <button class="r9btn" id="r9send">Send</button>
-        ${m?'<button class="r9btn" id="r9cancel">Discard</button>':""}
+        <button class="r9btn" id="r9cancel">Discard</button>
         <span class="r9msg" id="r9sm" style="text-align:left;min-height:0"></span>
       </div>`;
 
     const out=$("#r9sm"), btn=$("#r9send");
-    if(m) bindTap($("#r9cancel"),()=>{ this.replyTo=null; this.view="inbox"; this.paint(); });
+    out.setAttribute("role","status");
+    const fields=["r9to","r9subj","r9body"].map(id=>main.querySelector("#"+id));
+    if(draft) fields.forEach((f,i)=>f.value=draft.values[i]);
+    fields.forEach(f=>f.addEventListener("input",()=>{
+      this.drafts[key]={values:fields.map(f=>f.value)};
+      out.className="r9msg ok"; out.textContent="Draft kept until logout or page reload.";
+    }));
+    bindTap($("#r9cancel"),()=>{
+      if(this.sending) return;
+      if(this.drafts[key] && !window.confirm("Discard this email draft?")) return;
+      delete this.drafts[key]; this.replyTo=null; this.view="inbox"; this.paint();
+    });
     bindTap(btn,async()=>{
-      const to=$("#r9to").value.trim(), subject=$("#r9subj").value.trim(), text=$("#r9body").value.trim();
+      if(btn.disabled || this.sending) return;
+      const [to,subject,text]=fields.map(f=>f.value.trim());
       if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to)){ out.className="r9msg"; out.textContent="Bad recipient address."; return; }
       if(!text){ out.className="r9msg"; out.textContent="Message is empty."; return; }
-      btn.disabled=true; out.className="r9msg ok"; out.textContent="sending…";
+      this.sending=true;
+      btn.disabled=true; fields.forEach(f=>f.disabled=true); out.className="r9msg ok"; out.textContent="sending…";
       try{
         const r=await AUTH.fetch("/reply",{method:"POST",headers:{"Content-Type":"application/json"},
           body:JSON.stringify({id:m?m.id:null,to,subject,text})});
@@ -7771,10 +7832,10 @@ const ROOT9={
           throw new Error(hint||j.detail||j.error||("HTTP "+r.status));
         }
         out.className="r9msg ok"; out.textContent="sent.";
-        this.replyTo=null; SND.ok();
-        setTimeout(()=>{ this.view="sent"; this.refresh(false); },700);
+        delete this.drafts[key]; this.replyTo=null; SND.ok();
+        setTimeout(()=>{ if(this.view==="compose" && main.isConnected){ this.view="sent"; this.refresh(true); } },700);
       }catch(e){ out.className="r9msg"; out.textContent=e.message||"send failed"; }
-      btn.disabled=false;
+      this.sending=false; btn.disabled=false; fields.forEach(f=>f.disabled=false);
     });
   },
 
@@ -7948,15 +8009,16 @@ const ROOT9={
       <div class="r9sub">loading live posts + broadcast history<span class="cur9"></span></div>`;
     let d=null, li={connected:false,shares:{}};
     try{
-      const [r,lr]=await Promise.all([AUTH.fetch("/posts"),AUTH.fetch("/li/status")]);
+      const [r,lr]=await Promise.all([AUTH.fetch("/posts"),AUTH.fetch("/li/status").catch(()=>null)]);
       if(!r.ok) throw new Error("HTTP "+r.status);
       d=await r.json();
-      if(lr.ok) li=await lr.json();
+      if(lr&&lr.ok) li=await lr.json();
     }catch(e){
       main.innerHTML=`<div class="r9h">NEWSLETTER</div>
         <div class="r9empty">Couldn't load posts: ${esc(e.message||"error")}</div>`;
       return;
     }
+    if(this.view!=="news" || !main.isConnected || !AUTH.in) return;
     const posts=d.posts||[], subs=d.subscribers||0, shares=li.shares||{};
     const liLine=li.connected
       ?`LinkedIn: <b style="color:#33ff66">${esc(li.name||"connected")}</b> · token to ${esc((li.expiresAt||"").slice(0,10))}`
@@ -7969,7 +8031,11 @@ const ROOT9={
       </tr></thead><tbody>
         ${posts.map((p,i)=>`<tr>
           <td><div>${esc(p.title)}</div>
-              <div class="dim" style="font-size:11px">${esc((p.date||"").slice(0,16))}</div></td>
+              <div class="dim" style="font-size:11px">${esc((p.date||"").slice(0,16))}</div>
+              <details style="margin-top:8px"><summary style="cursor:pointer">Preview release</summary>
+                <div class="r9pre" style="margin-top:8px">${esc(p.desc||"No summary available.")}</div>
+                ${/^https:\/\//i.test(p.url||"")?`<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">Read full post ↗</a>`:""}
+              </details></td>
           <td>${p.sentAt?`<span class="dim">sent to ${p.sentTo}<br><span style="font-size:10.5px">${esc(this.ago(p.sentAt))}</span></span>`:
             (subs?`<button class="r9btn" id="r9nl${i}">send to ${subs}</button>`:`<span class="dim">no list</span>`)}</td>
           <td>${shares[p.slug]?`<span class="dim">shared<br><span style="font-size:10.5px">${esc(this.ago(shares[p.slug]))}</span></span>`:
@@ -7990,6 +8056,7 @@ const ROOT9={
         const r=await AUTH.fetch("/li/insights");
         if(!r.ok) throw new Error("HTTP "+r.status);
         const ins=await r.json();
+        if(!sub.isConnected || !box.isConnected) return;
         if(!(ins.rows||[]).length){ sub.textContent="nothing shared yet"; return; }
         sub.innerHTML=ins.apiAvailable
           ?`likes + comments live from the API · impressions: <span class="dim">${esc(ins.impressionsNote)}</span>`
@@ -8009,21 +8076,21 @@ const ROOT9={
       }catch(e){ sub.innerHTML=`<span class="dim">couldn't load engagement: ${esc(e.message||"error")}</span>`; }
     })();
     bindTap($("#r9licon"),()=>{ window.open(EP()+"/li/auth?t="+encodeURIComponent(AUTH.token()||""),"_blank");
-      setTimeout(()=>this.vNews(main),15000); });
+      setTimeout(()=>{if(this.view==="news"&&main.isConnected) this.vNews(main);},15000); });
     const arm=(b,label,run)=>{
       let armed=false,timer=null;
       bindTap(b,async()=>{
         if(!armed){ armed=true; b.textContent="CONFIRM?"; b.style.borderColor="#ffd75e";
           timer=setTimeout(()=>{armed=false; if(b){b.textContent=label; b.style.borderColor="";}},5000); return; }
         clearTimeout(timer); b.textContent="working…"; b.disabled=true;
-        await run(b); setTimeout(()=>this.vNews(main),1800);
+        await run(b); setTimeout(()=>{if(this.view==="news"&&main.isConnected) this.vNews(main);},1800);
       });
     };
     posts.forEach((p,i)=>{
       const nb=$("#r9nl"+i);
       if(nb) arm(nb,"send to "+subs,async(b)=>{
         try{
-          const r=await AUTH.fetch("/broadcast",{method:"POST",body:JSON.stringify({slug:p.slug})});
+          const r=await AUTH.fetch("/broadcast",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({slug:p.slug})});
           const j=await r.json().catch(()=>({}));
           if(r.ok) b.textContent=`sent ${j.sent}/${j.total}`+(j.failed?` (${j.failed} failed)`:"");
           else if(r.status===409) b.textContent="already sent";
@@ -8035,7 +8102,7 @@ const ROOT9={
         try{
           // Default hook Cole approves by confirming; edit later posts in the flow if wanted.
           const text=p.title+"\n\n"+p.desc+"\n\n"+p.url;
-          const r=await AUTH.fetch("/li/post",{method:"POST",body:JSON.stringify({slug:p.slug,text})});
+          const r=await AUTH.fetch("/li/post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({slug:p.slug,text})});
           const j=await r.json().catch(()=>({}));
           if(r.ok) b.textContent="shared ✓";
           else if(r.status===409) b.textContent="already shared";
@@ -8436,6 +8503,7 @@ document.addEventListener("keydown",e=>{
 });
 /* a session revoked mid-flight drops you back to the passcode screen */
 window.addEventListener("coleos:loggedout",()=>{
+  ROOT9.drafts={}; ROOT9.data=[]; ROOT9.replyTo=null;
   if(ROOT9.node&&ROOT9.node.classList.contains("on")) ROOT9.login("Session expired. Sign in again.");
 });
 
