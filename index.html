@@ -1642,6 +1642,7 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
 .r9tag.email{border-color:#1d7a4d}
 .r9tag.contact{border-color:#7a6b1d;color:#ffe08a}
 .r9tag.sent{border-color:#1d4f7a;color:#8ac8ff}
+.r9tag.forward_error{border-color:#7a1d1d;color:#ff8a8a}
 .r9new{color:#2fe38a}
 
 /* log feed */
@@ -7742,8 +7743,9 @@ const ROOT9={
         (!q||[m.name,m.email,m.subject,m.message].some(v=>String(v||"").toLowerCase().includes(q))));
       main.querySelector("#r9mailcount").textContent=rows.length+" matching message"+(rows.length===1?"":"s");
       const box=main.querySelector("#r9mailrows");
-      box.innerHTML=rows.length?`<table class="r9tbl"><thead><tr><th>When</th><th>${sent?"To":"From"}</th><th>Subject</th><th>State</th></tr></thead><tbody>
+      box.innerHTML=rows.length?`<table class="r9tbl"><thead><tr><th>When</th><th>Kind</th><th>${sent?"To":"From"}</th><th>Subject</th><th>State</th></tr></thead><tbody>
         ${rows.map(m=>`<tr><td class="dim">${esc(this.ago(m.created_at))}</td>
+          <td><span class="r9tag ${esc(m.kind)}">${esc(m.kind==="forward_error"?"forward!":m.kind)}</span></td>
           <td class="${m.read_at||sent?"":"r9new"}">${esc(sent?m.email:(m.name||m.email))}</td>
           <td><button class="r9maillink" data-id="${m.id}">${esc(m.subject||"(no subject)")}</button></td>
           <td class="dim">${sent?"sent":m.replied_at?"replied":m.read_at?"read":"NEW"}</td></tr>`).join("")}
