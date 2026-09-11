@@ -8040,7 +8040,7 @@ const ROOT9={
         const pending=(delivery.pending||0)+(delivery.failed||0);
         const held=(delivery.sending||0)+(delivery.uncertain||0);
         return `<div class="dim">${delivery.sent||0} delivered${delivery.skipped?` · ${delivery.skipped} removed from list`:""}</div>`+
-          (held?`<div style="color:#ffd75e;margin:6px 0">${held} in progress / needs verification. Not resent automatically.</div>`:"")+
+          (held?`<div style="color:#ffd75e;margin:6px 0">${held} in progress / needs verification. Not resent automatically — some may already have it.</div><button class="r9btn" id="r9nu${i}" style="margin-bottom:6px">retry ${held} uncertain</button>`:"")+
           (pending?`<button class="r9btn" id="r9nl${i}">retry ${pending} unsent</button>`:"");
       }
       return p.sentAt?`<span class="dim">sent to ${p.sentTo}<br>${esc(this.ago(p.sentAt))}</span>`:
@@ -8120,6 +8120,15 @@ const ROOT9={
           if(r.ok) b.textContent=`delivered ${j.delivered??j.sent}/${j.total}`+(j.failed?` · ${j.failed} unsent`:"")+(j.uncertain?` · ${j.uncertain} verify`:"");
           else if(r.status===409) b.textContent="already sent";
           else{ b.textContent="failed"; b.title=(j.error||"")+" "+(j.detail||""); }
+        }catch(e){ b.textContent="failed"; }
+      });
+      const ub=$("#r9nu"+i);
+      if(ub) arm(ub,ub.textContent,async(b)=>{
+        try{
+          const r=await AUTH.fetch("/broadcast/retry-uncertain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({slug:p.slug})});
+          const j=await r.json().catch(()=>({}));
+          if(r.ok) b.textContent=`resent ${j.sent}/${j.released}`+(j.failed?` · ${j.failed} unsent`:"")+(j.uncertain?` · ${j.uncertain} still verify`:"");
+          else{ b.textContent="failed"; b.title=j.error||("HTTP "+r.status); }
         }catch(e){ b.textContent="failed"; }
       });
       const lb=$("#r9li"+i);
