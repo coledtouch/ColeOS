@@ -8069,8 +8069,8 @@ const ROOT9={
       <div class="r9sub" id="r9liperf">loading engagement<span class="cur9"></span></div>
       <div id="r9liperfbody"></div>
       <div class="r9row" style="margin-top:13px"><button class="r9btn" id="r9nlref">Refresh</button></div>
-      <div class="r9sub" style="margin-top:8px">Both actions are two-tap: arm, then confirm. The worker
-        refuses to mail or share the same release twice.</div>`;
+      <div class="r9sub" style="margin-top:8px">Both actions are two-tap: arm, then confirm.
+        Email retries skip recipients already recorded as delivered.</div>`;
     bindTap($("#r9nlref"),()=>this.vNews(main));
     /* engagement loads after the main table so a slow LinkedIn API never blocks the view */
     (async()=>{
