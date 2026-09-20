@@ -8100,18 +8100,40 @@ const ROOT9={
         sub.innerHTML=ins.apiAvailable
           ?`likes + comments live from the API · impressions: <span class="dim">${esc(ins.impressionsNote)}</span>`
           :`<span class="dim">${esc(ins.apiReason||"engagement API unavailable")} · impressions &amp; full stats via the per-post links below</span>`;
-        box.innerHTML=`<table class="r9tbl"><thead><tr>
-            <th>Post</th><th style="width:70px">Likes</th><th style="width:80px">Comments</th><th style="width:130px">On LinkedIn</th>
+        /* SCOREBOARD — LinkedIn exposes none of this by API, so Cole reads it off the
+           per-post stats page and logs it here. Signal = profile views + link clicks:
+           the numbers that become conversations. Reactions are shown, not scored. */
+        const F=[["impressions","impr"],["reactions","react"],["profile_views","profile"],["link_clicks","clicks"],["followers","follows"]];
+        const sig=m=>m?((m.profile_views||0)+(m.link_clicks||0)):null;
+        const best=Math.max(0,...ins.rows.map(x=>sig(x.metrics)||0));
+        box.innerHTML=`<div class="r9sub" style="margin-bottom:8px">Scoreboard: open <b>stats ↗</b>, type the numbers in, press save.
+            <b style="color:#8fffc4">Signal</b> = profile views + link clicks. Blank fields keep their last value.</div>
+          <div class="r9tablewrap"><table class="r9tbl"><thead><tr>
+            <th>Post</th>${F.map(f=>`<th style="width:64px">${f[1]}</th>`).join("")}<th style="width:60px">Signal</th><th style="width:150px"></th>
           </tr></thead><tbody>
-          ${ins.rows.map(x=>`<tr>
+          ${ins.rows.map((x,i)=>{ const m=x.metrics, s=sig(m); return `<tr data-slug="${esc(x.slug)}">
             <td><div>${esc(x.slug)}</div><div class="dim" style="font-size:10.5px">${esc(this.ago(x.at))}${
-              x.mode?` · <span style="color:${/native/.test(x.mode)?"#2fe38a":"#ffd75e"}">${esc(x.mode)}</span>`:""}</div></td>
-            <td>${x.likes==null?'<span class="dim">—</span>':`<b style="color:#33ff66">${x.likes}</b>`}</td>
-            <td>${x.comments==null?'<span class="dim">—</span>':`<b style="color:#33ff66">${x.comments}</b>`}</td>
-            <td style="font-size:11px">${x.postUrl?`<a href="${esc(x.postUrl)}" target="_blank" rel="noopener">post ↗</a>`:'<span class="dim">—</span>'}
-              ${x.analyticsUrl?` · <a href="${esc(x.analyticsUrl)}" target="_blank" rel="noopener">stats ↗</a>`:""}</td>
-          </tr>`).join("")}
-        </tbody></table>`;
+              x.mode?` · <span style="color:${/native/.test(x.mode)?"#2fe38a":"#ffd75e"}" title="${esc(x.mode)}">${/native/.test(x.mode)?"native + link in comment":"fallback: link in body"}</span>`:""}</div></td>
+            ${F.map(f=>`<td><input class="r9in r9met" data-k="${f[0]}" inputmode="numeric" aria-label="${f[0]} for ${esc(x.slug)}"
+              style="width:56px;padding:3px 5px" value="${m&&m[f[0]]!=null?m[f[0]]:""}"></td>`).join("")}
+            <td>${s==null?'<span class="dim">—</span>':`<b style="color:${best&&s===best?"#ffd75e":"#33ff66"}">${s}</b>`}</td>
+            <td style="font-size:11px"><button class="r9btn r9metsave" style="width:auto;min-height:0;padding:3px 9px;font-size:11px">save</button>
+              ${x.analyticsUrl?` <a href="${esc(x.analyticsUrl)}" target="_blank" rel="noopener">stats ↗</a>`:""}
+              ${x.postUrl?` <a href="${esc(x.postUrl)}" target="_blank" rel="noopener">post ↗</a>`:""}</td>
+          </tr>`; }).join("")}
+        </tbody></table></div>`;
+        box.querySelectorAll(".r9metsave").forEach(b=>bindTap(b,async()=>{
+          const tr=b.closest("tr"), body={slug:tr.dataset.slug};
+          tr.querySelectorAll(".r9met").forEach(i=>{ if(i.value.trim()!=="") body[i.dataset.k]=i.value.trim(); });
+          b.disabled=true; b.textContent="…";
+          try{
+            const r=await AUTH.fetch("/li/metrics",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+            const j=await r.json().catch(()=>({}));
+            b.textContent=r.ok?"saved":"failed"; b.title=r.ok?"":(j.error||("HTTP "+r.status));
+            if(r.ok) setTimeout(()=>{ if(this.view==="news"&&main.isConnected) this.vNews(main); },900);
+          }catch(e){ b.textContent="failed"; }
+          finally{ b.disabled=false; }
+        }));
       }catch(e){ sub.innerHTML=`<span class="dim">couldn't load engagement: ${esc(e.message||"error")}</span>`; }
     })();
     bindTap($("#r9licon"),()=>{ window.open(EP()+"/li/auth?t="+encodeURIComponent(AUTH.token()||""),"_blank");
