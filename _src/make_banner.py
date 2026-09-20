@@ -97,8 +97,8 @@ d0.text((x0 * S, 178 * S), "ARCHITECT", font=f(SANSB, 45), fill=INK)
 d0.rectangle([x0 * S, 235 * S, (x0 + 74) * S, 238 * S], fill=GREEN)
 
 # the numbers that matter
-d0.text((x0 * S, 253 * S), "12", font=f(MONOB, 27), fill=GREEN)
-w12 = d0.textlength("12", font=f(MONOB, 27))
+d0.text((x0 * S, 253 * S), "13", font=f(MONOB, 27), fill=GREEN)
+w12 = d0.textlength("13", font=f(MONOB, 27))
 d0.text((x0 * S + w12 + 10 * S, 259 * S), "production platforms shipped solo",
         font=f(MONO, 18), fill=DIM)
 

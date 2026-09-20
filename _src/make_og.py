@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate og-image-v2.png (the 1200x630 social card) with the current platform count.
+"""Regenerate og-image-v3.png (the 1200x630 social card) with the current platform count.
 
 The card was hand-designed — Arial Bold on a teal gradient, no generator — so this
 patches the one number in place on _src/og-base.png rather than rebuilding the card:
@@ -39,6 +39,6 @@ layer = Image.new("RGBA", (300, 120), (0, 0, 0, 0))
 ImageDraw.Draw(layer).text((10, 10), N, font=ImageFont.truetype(FONT, SIZE), fill=DIGIT + (255,))
 glyph = layer.crop(layer.getbbox())
 im.paste(glyph, (INK_LEFT, INK_TOP), glyph)
-out = os.path.join(ROOT, "og-image-v2.png")
+out = os.path.join(ROOT, "og-image-v3.png")
 im.save(out)
 print("wrote", out, "with count", N)

@@ -9,7 +9,7 @@ Everything in this folder is version-controlled but excluded from the site deplo
 | `ci-deploy.js` | What the GitHub Action runs: applies the Adviser's staged edits, stamps `sw.js`, publishes to Cloudflare, clears the queue, commits back. |
 | `resume-print.html` | Print source of the PDF résumé (WeasyPrint). Edit here, then `make_pdf.sh`. |
 | `make_pdf.sh` | Rebuilds `../Cole-Ciprari-Systems-Architect-Resume.pdf` (run in WSL). |
-| `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v2.png`. |
+| `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v3.png`. |
 | `make_banner.py` | LinkedIn cover banner generator (1584×396). Change the `"12"` string, run in WSL, upload the PNG. |
 
 ## Adding a platform (the whole checklist, now)
