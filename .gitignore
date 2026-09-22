@@ -6,3 +6,6 @@ desktop.ini
 # Scratch files
 *.tmp
 *.bak
+
+# Local tooling config (Claude preview servers) — never committed
+.claude/

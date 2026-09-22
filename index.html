@@ -214,6 +214,26 @@ button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
   content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
   background:repeating-linear-gradient(0deg,#000 0 1px,transparent 1px 3px);
 }
+/* ---------- IDENTITY: who this desktop belongs to ----------
+   The first screen has to say who Cole is before anything is opened; a visitor
+   arriving from anywhere but LinkedIn otherwise meets a wall of unexplained icons.
+   Wide screens: a wallpaper signature on the right. It sits before #icons in the
+   DOM so icons paint over it, and ignores the pointer so it can never block the
+   desktop. Phones: a header band above the icon grid (see the 560px rules). */
+#ident{
+  position:absolute;right:30px;top:46%;transform:translateY(-50%);
+  text-align:right;pointer-events:none;color:#fff;
+  text-shadow:0 1px 0 rgba(0,0,0,.4),0 2px 16px rgba(0,35,35,.6);
+}
+#ident h1{margin:0;font:bold clamp(26px,3vw,44px)/1.05 var(--sans);letter-spacing:-.3px}
+#ident p{margin:7px 0 0;font:bold clamp(11px,1vw,14px)/1.3 var(--sans);
+  letter-spacing:2.4px;text-transform:uppercase;color:#d8f6f2}
+/* 561-900px: the live ticker is hidden at these widths, so the top-right corner is free */
+@media(max-width:900px){#ident{top:16px;right:18px;transform:none}}
+/* short and wide (landscape phones): the icon grid spreads across nearly the full width */
+@media(max-height:430px) and (min-width:561px){#ident{display:none}}
+/* set by fitIdent() when the icon grid would run underneath it */
+#ident.crowded{visibility:hidden}
 /* Real grid: fills a column top-to-bottom then moves right, and every cell is
    the same size so rows and columns align regardless of label length. */
 #icons{
@@ -1466,6 +1486,17 @@ ul.bl li em{color:var(--grn);font-style:normal;font-weight:bold}
   .pal{grid-template-columns:repeat(10,1fr)}
   .dlgrow{padding:14px 12px 11px;gap:10px}
 }
+@media(max-width:560px){
+  /* The identity becomes a header band. The band's tint keeps the small title line
+     above 4.5:1 contrast even where the wallpaper gradient is at its lightest. */
+  #ident{top:0;left:0;right:0;transform:none;text-align:left;
+    padding:10px 14px 9px;background:rgba(0,30,30,.28)}
+  #ident h1{font-size:23px}
+  #ident p{font-size:10.5px;letter-spacing:1.8px;margin-top:3px}
+  /* The grid starts below the band, and scrolls rather than silently clipping its
+     last row on short phones (Contact was already cut off below ~690px tall). */
+  #icons{top:62px;max-height:calc(100% - 66px);overflow-y:auto;overflow-x:hidden}
+}
 @media(max-width:400px){
   #icons{grid-auto-flow:row;grid-template-rows:none;grid-template-columns:repeat(3,minmax(0,1fr))}
   .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1920,6 +1951,7 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
 
 <!-- ============ DESKTOP ============ -->
 <div id="desktop">
+  <div id="ident"><h1>Cole Ciprari</h1><p>Business Systems Architect</p></div>
   <div id="icons"></div>
   <div id="tick" role="status" aria-label="Live system status" hidden></div>
   <div id="windows"></div>
@@ -7189,6 +7221,20 @@ function buildIcons(){
     activate(b,()=>APPS[d.a](),sel);
     c.appendChild(b);
   });
+  fitIdent();
+}
+
+/* The desktop name tag must never sit on top of icons. At short, medium-width sizes
+   the column-flow grid spreads right into its corner, and CSS can't know how many
+   columns the grid will need — so measure, and step aside only on a real overlap. */
+function fitIdent(){
+  const id=$("#ident"); if(!id) return;
+  id.classList.remove("crowded");
+  if(innerWidth<=560) return;                       // phones: a header band, can't collide
+  const r=id.getBoundingClientRect(); if(!r.width) return;
+  const hit=$$("#icons .dicon").some(d=>{ const b=d.getBoundingClientRect();
+    return b.right>r.left-8 && b.left<r.right+8 && b.bottom>r.top && b.top<r.bottom; });
+  if(hit) id.classList.add("crowded");
 }
 
 /* =========================================================================
@@ -8894,6 +8940,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){ closeStart(); $("#ctx").style.display="none"; }
 });
 window.addEventListener("resize",()=>{
+  fitIdent();
   Object.keys(openWins).forEach(id=>{
     const w=openWins[id];
     if(isMobile()){ Object.assign(w.node.style,{left:"0px",top:"0px",width:"100%",height:"100%"}); w.maxed=true; }

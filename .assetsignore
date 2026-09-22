@@ -8,3 +8,5 @@
 # sources and CI — version-controlled, never published
 _src/
 .github/
+# local tooling config — never published
+.claude/
