@@ -2505,7 +2505,10 @@ const HEADSHOT="/headshot.png";
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const el=(t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!==undefined)e.innerHTML=h; return e;};
-const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+/* Quotes too: esc() output goes into value="…" and title="…" all over this file, and
+   an unescaped " there let a link or an email subject add its own onX= attribute. */
+const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 const isMobile=()=>window.matchMedia("(max-width: 860px)").matches;
 /* isTouch() is declared further down, next to the tap/hover open helpers. */
 
@@ -4566,7 +4569,7 @@ render();`}}
           <div class="abprev">
             <div class="ablbl">preview &mdash; sandboxed iframe
               <span class="abgrow"><span class="ablink abopen">open in new tab</span></span></div>
-            <div class="abpv"><iframe sandbox="allow-scripts allow-modals" title="App preview"></iframe></div>
+            <div class="abpv"><iframe sandbox="allow-scripts allow-modals allow-forms" title="App preview"></iframe></div>
           </div>
           <div class="abcon">
             <div class="ablbl">console <span class="abcount"></span>
@@ -5040,13 +5043,20 @@ render();`}}
       }
       dev.onchange=applyDevice; applyDevice();
 
+      /* The pop-out gets the same sandbox as the preview pane. A blob: URL inherits
+         ciprari.ai's origin, so opening the app itself as one ran a shared ?app= link's
+         code with access to the admin session. The wrapper page has no script of its
+         own; the app runs in an opaque-origin iframe, exactly as it does in the pane. */
       $(".abopen").onclick=()=>{
         try{
-          const b=new Blob([assemble()],{type:"text/html"});
-          const u=URL.createObjectURL(b);
+          const page=`<!doctype html><meta charset="utf-8"><title>${esc(project.name||"App")} — preview</title>`+
+            `<style>html,body{margin:0;height:100%;background:#fff}iframe{display:block;border:0;width:100%;height:100%}</style>`+
+            `<iframe autofocus sandbox="allow-scripts allow-modals allow-forms" title="App preview" srcdoc="${esc(assemble())}"></iframe>`;
+          const u=URL.createObjectURL(new Blob([page],{type:"text/html"}));
           const w=window.open(u,"_blank");
           setTimeout(()=>URL.revokeObjectURL(u),30000);
-          if(!w) say("Your browser blocked the pop-up.","err");
+          if(!w){ say("Your browser blocked the pop-up.","err"); return; }
+          w.opener=null;
         }catch(e){ say("Could not open: "+e.message,"err"); }
       };
 
@@ -5083,8 +5093,9 @@ render();`}}
             if(/\.json$/i.test(f.name)){
               const j=JSON.parse(txt);
               const pr=j.project||j;
-              if(!pr||typeof pr.files!=="object") throw new Error("no files in that JSON");
-              project={name:pr.name||f.name.replace(/\.json$/i,""),files:pr.files,ts:Date.now()};
+              const files=safeFiles(pr&&pr.files);
+              if(!Object.keys(files).length) throw new Error("no files in that JSON");
+              project={name:String(pr.name||f.name.replace(/\.json$/i,"")).slice(0,80),files,ts:Date.now()};
             }else{
               project=freshProject(f.name.replace(/\.[^.]+$/,""),{"index.html":txt,"style.css":"","script.js":""});
             }
@@ -5118,6 +5129,15 @@ render();`}}
           return "g"+b64u(new Uint8Array(buf));
         }catch(e){ return "r"+b64u(bytes); }   /* older browsers: uncompressed */
       }
+      /* Share links, imported JSON and AI replies all come from outside. Keep only the
+         names the New File button would allow (letters, digits, _ . -, a .html/.css/.js
+         extension) and string contents, so a file name can never carry markup. */
+      function safeFiles(files){
+        const out={};
+        for(const k of Object.keys(files&&typeof files==="object"?files:{}))
+          if(/^[\w.-]{1,64}$/.test(k)&&/\.(html?|css|js)$/i.test(k)&&typeof files[k]==="string") out[k]=files[k];
+        return out;
+      }
       async function decodeShare(payload){
         try{
           const tag=payload[0], data=unb64u(payload.slice(1));
@@ -5130,8 +5150,9 @@ render();`}}
             json=new TextDecoder().decode(data);
           }else return null;
           const pr=JSON.parse(json);
-          if(!pr||typeof pr.files!=="object") return null;
-          return {name:pr.name||"Shared",files:pr.files,ts:Date.now()};
+          const files=safeFiles(pr&&pr.files);
+          if(!Object.keys(files).length) return null;
+          return {name:String(pr.name||"Shared").slice(0,80),files,ts:Date.now()};
         }catch(e){ return null; }
       }
       $(".abshare").onclick=async()=>{
@@ -5239,10 +5260,7 @@ render();`}}
         try{
           const j=JSON.parse(clean);
           if(j&&j.files&&typeof j.files==="object"){
-            const files={};
-            Object.keys(j.files).forEach(k=>{
-              if(/\.(html?|css|js)$/i.test(k)&&typeof j.files[k]==="string") files[k]=j.files[k];
-            });
+            const files=safeFiles(j.files);
             if(Object.keys(files).length) return {files,note:j.note||""};
           }
         }catch(e){}
@@ -6240,14 +6258,16 @@ browser:(startQ)=>{
           return {e,sc};
         }).filter(x=>x.sc>0).sort((a,b)=>b.sc-a.sc).map(x=>x.e);
       }
+      /* Match on the raw text, then escape each piece. Matching inside the escaped
+         HTML let a search for "quo" split &quot; in two. */
       function hl(text,q){
-        const terms=q.toLowerCase().split(/\s+/).filter(t=>t.length>2);
-        let out=esc(text);
-        terms.forEach(t=>{
-          try{ out=out.replace(new RegExp("("+t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi"),"<b>$1</b>"); }catch(x){}
-        });
-        return out;
+        const terms=q.toLowerCase().split(/\s+/).filter(t=>t.length>2)
+          .map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+        if(!terms.length) return esc(text);
+        let re; try{ re=new RegExp("("+terms.join("|")+")","gi"); }catch(x){ return esc(text); }
+        return String(text).split(re).map((s,i)=>i%2?"<b>"+esc(s)+"</b>":esc(s)).join("");
       }
+
       function nav(p,noPush){
         if(!noPush){ hist=hist.slice(0,hi+1); hist.push(p); hi=hist.length-1; }
         render(p);
@@ -8502,9 +8522,20 @@ const ROOT9={
           <div class="r9sub" style="margin:6px 0 2px">${words(p.body_html)} words · ${esc(p.keywords||"")} · staged ${esc(p.created||"")}</div>
           <div class="r9sub" style="margin:4px 0">${esc(p.desc||"")}</div>
           <details style="margin-top:6px"><summary class="r9sub" style="cursor:pointer">read the draft</summary>
-            <div class="r9sub" style="margin-top:8px;line-height:1.55;max-height:360px;overflow:auto">${String(p.body_html||"").replace(/<script[\s\S]*?<\/script>/gi,"")}</div>
+            <iframe class="r9draft" sandbox="" referrerpolicy="no-referrer" title="Draft preview"
+              style="display:block;width:100%;height:360px;margin-top:8px;border:1px solid #123c28;background:#fff"></iframe>
           </details>
         </div>`).join("");
+      /* The draft is model-written HTML, and the model has read text strangers wrote. Parsed
+         into this page, one onerror= would run as ciprari.ai beside the admin session, so it
+         renders in a frame with no script, no same-origin access and no network. */
+      box.querySelectorAll(".r9draft").forEach((f,i)=>{
+        f.srcdoc='<!doctype html><meta charset="utf-8">'+
+          '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'">'+
+          '<style>body{font:13px/1.6 system-ui,sans-serif;color:#111;margin:12px}'+
+          'blockquote{border-left:3px solid #999;margin:10px 0;padding-left:10px;color:#444}a{color:#0645ad}</style>'+
+          String(posts[i].body_html||"");
+      });
       box.querySelectorAll(".r9pdisc").forEach(b=>bindTap(b,async()=>{
         if(!window.confirm("Discard this staged post?")) return;
         await AUTH.fetch("/discard-post",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id:+b.dataset.id})});
@@ -8539,16 +8570,20 @@ const ROOT9={
           <span class="r9sub">${pending.length} staged change${pending.length>1?"s":""} · waiting for deploy</span>
           <button class="r9btn r9dall" style="width:auto;min-height:0;padding:5px 10px;font-size:11px">Discard all</button></div>`
         + pending.map(p=>{
+            /* Show everything Deploy would ship, not a character count: the Adviser reads text
+               strangers wrote, so reading this is the check that stops a planted script. */
+            const plain=(p.new||"").replace(/\\u003c|\\x3c|&lt;|&#0*60;?|&#x0*3c;?/gi,"<");   /* "<" hidden in JS/HTML escapes */
+            const risky=/<\s*(script|iframe|object|embed)\b|[\s"'\/]on[a-z]+\s*=|javascript\s*:|srcdoc/i.test(plain);
             const preview=p.kind==="write"
-              ? `new file · ${(p.new||"").length} chars`
-              : `<span style="color:#ff8a8a">- ${esc((p.old||"").slice(0,160))}${(p.old||"").length>160?"…":""}</span>\n<span style="color:#7dffb0">+ ${esc((p.new||"").slice(0,160))}${(p.new||"").length>160?"…":""}</span>`;
+              ? `<span style="color:#7dffb0">new file · ${(p.new||"").length} chars\n${esc(p.new||"")}</span>`
+              : `<span style="color:#ff8a8a">- ${esc(p.old||"")}</span>\n<span style="color:#7dffb0">+ ${esc(p.new||"")}</span>`;
             return `<div class="r9card" style="margin-bottom:8px">
               <div class="r9row" style="justify-content:space-between;align-items:center;gap:8px">
-                <span style="min-width:0"><span class="r9tag">${esc(p.kind)}</span> <b style="color:#8fffc4;font-size:12px;word-break:break-all">${esc(p.path)}</b></span>
+                <span style="min-width:0"><span class="r9tag">${esc(p.kind)}</span>${risky?` <span class="r9tag forward_error" title="Contains a script, an event handler, an iframe or a javascript: link. Read it before deploying.">has code</span>`:""} <b style="color:#8fffc4;font-size:12px;word-break:break-all">${esc(p.path)}</b></span>
                 <button class="r9btn r9disc" data-id="${p.id}" style="width:auto;min-height:0;padding:5px 10px;font-size:11px;flex:none">Discard</button>
               </div>
               ${p.note?`<div class="r9sub" style="margin:6px 0 2px">${esc(p.note)}</div>`:""}
-              <pre class="r9pre" style="margin-top:6px;max-height:170px;overflow:auto">${preview}</pre>
+              <pre class="r9pre" style="margin-top:6px;overflow:auto;resize:vertical;${(p.new||"").length+(p.old||"").length>1500?"height:320px":""}">${preview}</pre>
             </div>`;
           }).join("");
       box.querySelectorAll(".r9disc").forEach(b=>bindTap(b,async()=>{
@@ -8619,7 +8654,8 @@ const ROOT9={
 
       out.innerHTML=rows.length?`<table class="r9tbl"><thead><tr>${
         head.map(x=>`<th>${esc(x)}</th>`).join("")}</tr></thead><tbody>${
-        rows.map(r=>`<tr>${r.map(c=>`<td>${esc(String(c==null?"":c)).slice(0,90)}</td>`).join("")}</tr>`).join("")
+        /* Cut, then escape: cutting escaped text could split an entity like &quot; */
+        rows.map(r=>`<tr>${r.map(c=>`<td>${esc(String(c==null?"":c).slice(0,90))}</td>`).join("")}</tr>`).join("")
       }</tbody></table><div class="r9sub" style="margin-top:9px">${rows.length} row(s)</div>`
         :'<div class="r9empty">No rows.</div>';
     };
