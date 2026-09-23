@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>App preview — ColeOS</title>
+<script>
+/* ColeOS App Builder runner.
+ *
+ * ciprari.ai's Content-Security-Policy allows only its own scripts, and documents the
+ * page creates (srcdoc, blob:) inherit it, so user apps cannot run there. They run
+ * here instead. This page is served with its own policy (see _src/security-headers.js):
+ * inline script and any CDN are allowed, and the CSP `sandbox` directive gives it an
+ * opaque origin even when opened as a tab, so an app can never read ciprari.ai's
+ * storage or the admin session.
+ *
+ * Code only ever arrives by postMessage from a ciprari.ai page that framed or opened
+ * this one, never from the URL: a link that carried an app would let anyone put a
+ * full page of their own on ciprari.ai. Two ways in:
+ *   - the preview pane frames /sandbox once; every Run sends it the app's HTML
+ *   - "open in new tab" opens /sandbox; it asks its opener for the app, once
+ */
+(function () {
+  function show(html) { document.open(); document.write(html); document.close(); }
+  function note(text) {
+    show('<!doctype html><meta charset="utf-8"><title>ColeOS preview</title>' +
+      '<body style="font:14px/1.5 system-ui,sans-serif;color:#333;padding:24px">' +
+      String(text).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }) + "</body>");
+  }
+
+  // Fail closed: if this page ever arrives without its sandbox policy (a deploy that
+  // dropped the headers), it would share ciprari.ai's origin, so run nothing at all.
+  if (self.origin !== "null") { note("This preview is not isolated from ColeOS, so it will not run apps."); return; }
+
+  // Messages are accepted only from a ColeOS page on this site. Our own origin is opaque,
+  // but location.origin still names the site we were loaded from.
+  var SITE = location.origin;
+  var fromColeOS = function (e, who) {
+    return e.source === who && e.origin === SITE && e.data &&
+      typeof e.data.coleosRun === "string" && typeof e.data.html === "string";
+  };
+
+  if (window.parent === window) {
+    var opener = window.opener;
+    if (!opener) { note("Open an app from the ColeOS App Builder to preview it here."); return; }
+    window.addEventListener("message", function onApp(e) {
+      if (!fromColeOS(e, opener)) return;
+      window.removeEventListener("message", onApp);
+      window.opener = null;   // the app gets no handle back to ColeOS
+      show(e.data.html);
+    });
+    opener.postMessage({ coleosSandboxReady: 1 }, "*");
+    return;
+  }
+
+  /* In the pane this page loads once, and every Run replaces the app with a fresh srcdoc
+     frame (a clean slate each time, no network round trip). A frame rather than
+     document.write, because Chrome numbers errors in written scripts from the start of
+     each <script>, which would break the App Builder's error-to-file:line mapping. The
+     frame inherits this page's policy and opaque origin; the current app's console
+     messages are relayed up unchanged, anything from an older one is dropped. */
+  var app = null;
+  window.addEventListener("message", function (e) {
+    if (app && e.source === app.contentWindow) {
+      if (e.data && e.data.__coleos === 1) window.parent.postMessage(e.data, "*");
+      return;
+    }
+    if (!fromColeOS(e, window.parent)) return;
+    if (app) app.remove();
+    app = document.createElement("iframe");
+    app.title = "App preview";
+    app.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;border:0;background:#fff";
+    app.srcdoc = e.data.html;
+    document.body.appendChild(app);
+  });
+  window.parent.postMessage({ coleosSandboxReady: 1 }, "*");
+})();
+</script>
+</head>
+<body style="margin:0"></body>
+</html>

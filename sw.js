@@ -29,6 +29,8 @@ const PRECACHE = [
   "/headshot.png",
   "/blue.jpg",
 ];
+/* The App Builder's runner, cached apart from the shell so apps still run offline. */
+const RUNNER = "/sandbox";
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -37,6 +39,7 @@ self.addEventListener("install", (e) => {
       .then((c) => c.addAll(PRECACHE))
       // A single missing file must not abort the whole install.
       .catch(() => {})
+      .then(() => caches.open(ASSETS).then((c) => c.add(RUNNER)).catch(() => {}))
       .then(() => self.skipWaiting())
   );
 });
@@ -70,12 +73,33 @@ self.addEventListener("fetch", (e) => {
   try { url = new URL(req.url); } catch (_) { return; }
   if (url.origin !== self.location.origin) return;
 
+  // The App Builder's runner has its own security policy, so it is cached under its own
+  // key (a cached Response keeps its headers) and never served as, or stored as, "/".
+  if (url.pathname === "/sandbox" || url.pathname === "/sandbox.html") {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res.ok && res.status === 200) {
+            const copy = res.clone();
+            caches.open(ASSETS).then((c) => c.put(RUNNER, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(RUNNER).then((hit) => hit || Response.error()))
+    );
+    return;
+  }
+
   if (isHTML(req)) {
     e.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(SHELL).then((c) => c.put("/", copy)).catch(() => {});
+          // Only the desktop itself is the offline shell. Storing whatever page was
+          // visited last as "/" made /status or /resume boot offline in its place.
+          if (res.ok && (url.pathname === "/" || url.pathname === "/index.html")) {
+            const copy = res.clone();
+            caches.open(SHELL).then((c) => c.put("/", copy)).catch(() => {});
+          }
           return res;
         })
         .catch(() =>

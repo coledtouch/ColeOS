@@ -6,7 +6,8 @@ Everything in this folder is version-controlled but excluded from the site deplo
 | file | what it is |
 |---|---|
 | `sync-count.js` | **One source of truth for the platform count.** Reads `PRODUCTS` in `index.html` and rewrites every hand-written count (meta, JSON-LD, noscript, terminal, ColeAI, boot lines, ask/, resume, status). `node _src/sync-count.js ../coleos-api/src/worker.js` also syncs the worker. `--check` = report only. |
-| `ci-deploy.js` | What the GitHub Action runs: applies the Adviser's staged edits, stamps `sw.js`, publishes to Cloudflare, clears the queue, commits back. |
+| `ci-deploy.js` | What the GitHub Action runs: applies the Adviser's staged edits, builds the security headers, stamps `sw.js`, publishes to Cloudflare, clears the queue, commits back. |
+| `security-headers.js` | **The site's security headers** (CSP, HSTS, nosniff, frame and referrer rules), generated at every deploy because the Content-Security-Policy pins each page's inline `<script>` by SHA-256. Every deploy path calls it; a deploy that skipped it would ship without headers. `node _src/security-headers.js` prints the rules, `--write` writes `./_headers` for `wrangler dev` (gitignored, never uploaded as a file). Adding an inline script or a new outside host? It just works for inline scripts; outside hosts go in `sitePolicy()`. App Builder apps run in `/sandbox.html`, which has its own permissive, opaque-origin policy. |
 | `resume-print.html` | Print source of the PDF résumé (WeasyPrint). Edit here, then `make_pdf.sh`. |
 | `make_pdf.sh` | Rebuilds `../Cole-Ciprari-Systems-Architect-Resume.pdf` (run in WSL). |
 | `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v3.png`. |

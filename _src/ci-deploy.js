@@ -28,7 +28,7 @@ const MIME = { html: "text/html; charset=utf-8", js: "text/javascript; charset=u
   jpg: "image/jpeg", ico: "image/x-icon", pdf: "application/pdf", svg: "image/svg+xml" };
 
 function collect(dir) {
-  const ignore = new Set([".git", ".gitignore", ".assetsignore", ".github", "_src", "node_modules", ".DS_Store", "Thumbs.db", "desktop.ini"]);
+  const ignore = new Set([".git", ".gitignore", ".assetsignore", ".github", "_src", "node_modules", ".DS_Store", "Thumbs.db", "desktop.ini", "_headers", "_redirects", ".wrangler"]);
   const ai = path.join(dir, ".assetsignore");
   if (fs.existsSync(ai)) for (let line of fs.readFileSync(ai, "utf8").split(/\r?\n/)) {
     line = line.trim(); if (!line || line.startsWith("#")) continue;
@@ -48,9 +48,10 @@ function collect(dir) {
 }
 const h32 = b => crypto.createHash("sha256").update(b).digest("hex").slice(0, 32);
 
-function stampSW(dir) {
+// The headers are part of what a cached page is served with, so a policy change rolls the cache too.
+function stampSW(dir, headers = "") {
   const files = collect(dir).filter(f => f.rel !== "/sw.js").sort((a, b) => a.rel.localeCompare(b.rel));
-  const h = crypto.createHash("sha256");
+  const h = crypto.createHash("sha256").update(headers);
   for (const f of files) h.update(f.rel).update(fs.readFileSync(f.full));
   const ver = h.digest("hex").slice(0, 12), sw = path.join(dir, "sw.js");
   const src = fs.readFileSync(sw, "utf8"), out = src.replace(/const VERSION = "[0-9a-f]+";/, `const VERSION = "${ver}";`);
@@ -58,7 +59,7 @@ function stampSW(dir) {
   return ver;
 }
 
-async function deployAssets(dir) {
+async function deployAssets(dir, headers) {
   const files = collect(dir), manifest = {}, byHash = {};
   for (const f of files) {
     const buf = fs.readFileSync(f.full), hash = h32(buf);
@@ -80,7 +81,7 @@ async function deployAssets(dir) {
     if (up.result && up.result.jwt) completion = up.result.jwt;
   }
   const fd2 = new FormData();
-  fd2.append("metadata", JSON.stringify({ assets: { jwt: completion }, compatibility_date: "2026-08-12" }));
+  fd2.append("metadata", JSON.stringify({ assets: { jwt: completion, config: { _headers: headers } }, compatibility_date: "2026-08-12" }));
   const put = await (await fetch(`${base}/workers/scripts/coleos`, { method: "PUT", headers: auth, body: fd2 })).json();
   if (!put.success) throw new Error("deploy: " + JSON.stringify(put.errors));
   console.log(`deployed coleos: ${files.length} files, ${uploaded} uploaded`);
@@ -107,8 +108,12 @@ async function deployAssets(dir) {
   try { console.log(execSync("node _src/sync-count.js", { cwd: SITE, encoding: "utf8" }).trim()); }
   catch (e) { console.error("sync-count failed: " + (e.stdout || e.message)); process.exit(1); }
 
-  console.log("sw.js VERSION", stampSW(SITE));
-  await deployAssets(SITE);
+  // Security headers pin each page's inline script by hash, so build them after every edit above.
+  let headers;
+  try { headers = require("./security-headers").buildHeaders(SITE); }
+  catch (e) { console.error("security headers: " + e.message + " — aborting, nothing deployed"); process.exit(1); }
+  console.log("sw.js VERSION", stampSW(SITE, headers));
+  await deployAssets(SITE, headers);
   if (edits.length) await fetch(`${API}/deployed`, { method: "POST", headers: { authorization: "Bearer " + ADMIN } });
 
   const status = execSync("git status --porcelain", { cwd: SITE, encoding: "utf8" }).trim();

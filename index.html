@@ -2602,10 +2602,11 @@ const S={
   set(k,v){ try{ localStorage.setItem("coleos:"+k,JSON.stringify(v)); }catch(e){} }
 };
 
-/* The backend everything talks to. Baked in so nothing has to be typed on a
-   phone; S.get still wins if you ever point a build at a different Worker. */
+/* The backend everything talks to. Fixed: the Content-Security-Policy's connect-src
+   names only this origin, and a stored override (the old "Endpoint…" setting) would
+   still have carried the admin session to another host in the LinkedIn connect URL. */
 const API="https://coleos-api.coleciprari.workers.dev";
-const EP=()=>String(S.get("api.endpoint",null)||API).replace(/\/$/,"");
+const EP=()=>API;
 
 /* =========================================================================
    ANALYTICS BEACON
@@ -3743,7 +3744,6 @@ coleai:()=>openWindow({id:"coleai",title:"ColeAI",icon:IC.ai,w:660,h:560,route:"
     <div class="aihead">
       <span class="aidot"></span>
       <span class="aim">ColeAI &mdash; assistant, running on Claude</span>
-      <button class="btn95 aicfg">Endpoint&hellip;</button>
     </div>
     <div class="aiwrap"></div>
     <div class="aisug"></div>
@@ -3835,14 +3835,6 @@ coleai:()=>openWindow({id:"coleai",title:"ColeAI",icon:IC.ai,w:660,h:560,route:"
     ta.addEventListener("keydown",e=>{
       if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }
     });
-    body.querySelector(".aicfg").onclick=()=>{
-      /* Advanced override only — the default endpoint is built in. */
-      const v=window.prompt("API endpoint (blank resets to the default):\n\n"+API, S.get("api.endpoint","")||"");
-      if(v===null) return;
-      const t=v.trim();
-      S.set("api.endpoint", t||null);
-      dialog("ColeAI",IC.info,"Now using:<br><br><span style='font-family:var(--mono);font-size:11px;word-break:break-all'>"+esc(EP())+"</span>");
-    };
 
     add("ColeAI","Hi — I'm ColeAI. I know Cole's architecture work inside out: the thirteen platforms he shipped solo, how he approaches complex business systems, and where AI actually earns its place in production. Ask away.");
     if(sb[1]) sb[1].textContent="connected";
@@ -4806,10 +4798,20 @@ render();`}}
         return out;
       }
 
+      /* Apps run in /sandbox, not in srcdoc: a srcdoc frame inherits this page's
+         Content-Security-Policy, which allows no inline script. The sandbox page loads
+         once; every run sends it the latest HTML, and it swaps in a fresh app frame.
+         If it (re)loads, its "ready" message gets the latest HTML again (onMsg). */
+      let runNo=0, latest=null, sandboxReady=false;
+      function toSandbox(){
+        /* The sandbox has an opaque origin, so "*" is the only target that reaches it. */
+        if(latest&&sandboxReady&&fr.contentWindow) fr.contentWindow.postMessage({coleosRun:String(runNo),html:latest},"*");
+      }
       function run(){
         clearLog(true);
         try{
-          fr.srcdoc=assemble();
+          latest=assemble(); runNo++;
+          if(!fr.getAttribute("src")) fr.src="/sandbox"; else toSandbox();
           if(sb[1]) sb[1].textContent="running";
           say("Ran at "+new Date().toLocaleTimeString(),"ok");
         }catch(e){ say("Could not run: "+e.message,"err"); }
@@ -4875,6 +4877,7 @@ render();`}}
       function onMsg(e){
         if(!fr.contentWindow||e.source!==fr.contentWindow) return;   /* only our own preview */
         const d=e.data;
+        if(d&&d.coleosSandboxReady===1){ sandboxReady=true; toSandbox(); return; }
         if(!d||d.__coleos!==1) return;
         addLog(["log","info","warn","error","sys"].indexOf(d.kind)>=0?d.kind:"log",String(d.text));
       }
@@ -5043,21 +5046,23 @@ render();`}}
       }
       dev.onchange=applyDevice; applyDevice();
 
-      /* The pop-out gets the same sandbox as the preview pane. A blob: URL inherits
-         ciprari.ai's origin, so opening the app itself as one ran a shared ?app= link's
-         code with access to the admin session. The wrapper page has no script of its
-         own; the app runs in an opaque-origin iframe, exactly as it does in the pane. */
+      /* The pop-out is /sandbox opened as a tab. Its CSP `sandbox` directive gives it an
+         opaque origin, so a shared ?app= link's code can never reach the admin session.
+         The app is handed over by message when the tab asks for it (never in the URL, or
+         anyone could link a page of their own onto ciprari.ai); the tab then drops its
+         opener. */
       $(".abopen").onclick=()=>{
-        try{
-          const page=`<!doctype html><meta charset="utf-8"><title>${esc(project.name||"App")} — preview</title>`+
-            `<style>html,body{margin:0;height:100%;background:#fff}iframe{display:block;border:0;width:100%;height:100%}</style>`+
-            `<iframe autofocus sandbox="allow-scripts allow-modals allow-forms" title="App preview" srcdoc="${esc(assemble())}"></iframe>`;
-          const u=URL.createObjectURL(new Blob([page],{type:"text/html"}));
-          const w=window.open(u,"_blank");
-          setTimeout(()=>URL.revokeObjectURL(u),30000);
-          if(!w){ say("Your browser blocked the pop-up.","err"); return; }
-          w.opener=null;
-        }catch(e){ say("Could not open: "+e.message,"err"); }
+        let html;
+        try{ html=assemble().replace(BOOT,""); }catch(e){ say("Could not open: "+e.message,"err"); return; }
+        const w=window.open("/sandbox","_blank");
+        if(!w){ say("Your browser blocked the pop-up.","err"); return; }
+        const hand=e=>{
+          if(e.source!==w||!e.data||e.data.coleosSandboxReady!==1) return;
+          window.removeEventListener("message",hand);
+          w.postMessage({coleosRun:"popout",html},"*");   /* opaque origin: "*" is the only target */
+        };
+        window.addEventListener("message",hand);
+        setTimeout(()=>window.removeEventListener("message",hand),60000);
       };
 
       /* ================= EXPORT / IMPORT / SHARE ================= */

@@ -10,3 +10,7 @@ _src/
 .github/
 # local tooling config — never published
 .claude/
+# generated at deploy by _src/security-headers.js — never published as a file
+_headers
+# wrangler dev state (holds the dev machine's location) — never published
+.wrangler/

@@ -9,3 +9,7 @@ desktop.ini
 
 # Local tooling config (Claude preview servers) — never committed
 .claude/
+
+# generated at deploy by _src/security-headers.js
+_headers
+.wrangler/
