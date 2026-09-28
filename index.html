@@ -66,7 +66,8 @@
   {"@type":"EducationalOccupationalCredential","name":"OpenAI Certified Architect","recognizedBy":{"@type":"Organization","name":"OpenAI"}}
  ],
  "worksFor":[{"@type":"Organization","name":"Coen Construction"},
-  {"@type":"Organization","name":"Edgeball Strategies","url":"https://edgeballstrategies.com/"}],
+  {"@type":"Organization","name":"Edgeball Strategies","url":"https://edgeballstrategies.com/"},
+  {"@type":"Organization","name":"Ciprari.AI","url":"https://ciprari.ai/"}],
  "subjectOf":{"@type":"Blog","name":"the changelog","url":"https://changelog.ciprari.ai/"},
  "sameAs":[
   "https://www.linkedin.com/in/coleos",
@@ -1933,6 +1934,7 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
   <h2 style="font-size:19px;margin:20px 0 8px">Experience</h2>
   <ul>
     <li><strong>Edgeball Strategies</strong> — Editor in Chief, The Edge (contract), Sep 2026–present. Monthly LinkedIn newsletter for fleet, rental and dealer loaner operators.</li>
+    <li><strong>Ciprari.AI</strong> — Founder, Aug 2026–present. The practice behind ciprari.ai: ColeOS, the changelog, and the front door to 13 platforms shipped solo.</li>
     <li><strong>Coen Construction</strong> — Project Portfolio Manager, Oct 2025–present. Systems &amp; AI architecture, $8.5M portfolio.</li>
     <li><strong>Hannaford Bros. Co.</strong> — Evening Operations Manager, 2025. Performance systems architecture across 10 departments.</li>
     <li><strong>Andyman Dessert Baking Co.</strong> — Operations Manager, 2023–2024. POS/inventory/finance integration architecture.</li>
@@ -2411,6 +2413,13 @@ const ROLES=[
   r:"Started September 2026. Results go here once there are some.",
   b:["<b>Editor in Chief of The Edge:</b> Edgeball Strategies' monthly LinkedIn newsletter for fleet, rental and dealer loaner operators — operational intelligence from the Deal Desk, written as blueprints."],
   s:["Editorial","Fleet &amp; Mobility","Rental Operations","LinkedIn Newsletter"]},
+ {co:"CIPRARI.AI",role:"Founder",date:"Aug 2026 – Present",
+  scope:"Scope: Independent practice — ciprari.ai, ColeOS and the changelog",
+  p:"Thirteen production platforms don't fit on two pages, and a PDF can't show that any of them work. The work should be something you can open and click, not something you have to take my word for.",
+  a:"Build the résumé as a working product: ColeOS, a retro desktop OS on a Cloudflare Worker and D1, with ColeAI, an App Builder and a Job Fit Analyser, plus changelog.ciprari.ai, a build log that writes itself.",
+  r:"Live at ciprari.ai, linking out to all 13 platforms, with the changelog shipping a new release every day; Sunday's is the Rollout Report.",
+  b:["<b>Founder of Ciprari.AI:</b> the practice behind ciprari.ai — ColeOS, a résumé built as a working retro operating system with an AI assistant, an App Builder and a Job Fit Analyser, plus changelog.ciprari.ai, a build log that writes itself."],
+  s:["Cloudflare Workers","D1","Claude API","Product Design"]},
  {co:"COEN CONSTRUCTION",role:"Project Portfolio Manager",date:"Oct 2025 – Present",open:true,
   scope:"Scope: Systems &amp; AI Architecture — company-wide platform ownership, $8.5M portfolio",
   p:"A growing builder running an $8.5M portfolio on spreadsheets, email threads and tribal knowledge. No cross-project visibility, no standardized schedule data, change orders leaking margin, and an entire snow-operations business with no system at all.",
@@ -3310,7 +3319,7 @@ readme:()=>openWindow({id:"readme",title:"readme.txt — Notepad",icon:IC.doc,w:
   </div>`}),
 
 changelog:()=>openWindow({id:"changelog",title:"Changelog — release notes",icon:IC.doc,w:780,h:620,route:"changelog",
-  status:["changelog.ciprari.ai — new releases Mon · Wed · Fri + Sunday Rollout Report"],
+  status:["changelog.ciprari.ai — a new release every day · Sundays: the Rollout Report"],
   html:`<div style="display:flex;flex-direction:column;height:100%">
     <div style="flex:none;padding:6px 8px;border-bottom:1px solid #9c9c9c;display:flex;gap:7px;align-items:center;flex-wrap:wrap">
       <button class="btn95 cl-open">Open in browser</button>
@@ -3516,8 +3525,9 @@ drwxr-xr-x  cole  cole  15 years-of-experience/
 15+ years designing, integrating and scaling operational systems.
 <span class="ok">13 production platforms designed, built and shipped solo.</span>
 Full lifecycle: requirements → architecture → build → migration → adoption → measurement.
-<span class="mu">Currently: Project Portfolio Manager at Coen Construction, $8.5M portfolio,
-and Editor in Chief of The Edge, Edgeball Strategies' newsletter (contract).</span>`,
+<span class="mu">Currently: Project Portfolio Manager at Coen Construction, $8.5M portfolio;
+Editor in Chief of The Edge, Edgeball Strategies' newsletter (contract);
+and founder of Ciprari.AI, the practice behind this site.</span>`,
       products:()=>`<span class="ok">13 live platforms — architecture, build and deployment all mine:</span>
 
   <span class="c1">coenconstruction.com</span>            <span class="mu">construction ERP + public site · 120+ routes</span>
@@ -3802,10 +3812,10 @@ coleai:()=>openWindow({id:"coleai",title:"ColeAI",icon:IC.ai,w:660,h:560,route:"
       if(hit("jetdesk","meridian","flight","aviation","plane","pilot")) return "JetDesk.AI is Cole's offline-first flight-planning PWA for a PA-46 turboprop. The entire FAA airport database ships inside one file, legs are corrected by forecast winds aloft, a fuel-stop optimizer weighs detours against price, and METAR/TAF feeds drive per-runway wind verdicts. Fuel prices logged on one phone sync to every phone behind a PIN, via Cloudflare Pages Functions. Open My Projects to see it.";
       if(hit("bracelet","jewelry","jewellery","show it with words","audrey","storefront")) return "Show It With Words is the storefront Cole built for his mother Audrey's handmade bracelet business (on Etsy since 2014, 4.9 stars). Every product is drawn live as SVG — no stock art — and a six-step build-your-own wizard renders your exact word on the bracelet, tote or keyring as you type, with cart, bundle pricing and a provider-ready checkout. Open My Projects to see it.";
       if(hit("platform","project","built","shipped")) return "Thirteen, all live: coenconstruction.com (120-route construction ERP), estimate.pro (multi-tenant SaaS estimating for 25+ trades), curbscript.com (AI SaaS for realtors), thepunchlist.vercel.app (AI automation consultancy), jetdesk.ai (offline flight-planning PWA), showitwithwords.com (handmade e-commerce with a live-drawn product builder), north.construction, valhalla-k9.com, hiremariaelena.com, permitsketch.com (deck and porch permit drawings from a phone), and three Base44 apps — Aurora, Northern Hardy Honey and Mari'. Open My Projects to explore each one.";
-      if(hit("experience","history","career","worked")) return "Edgeball Strategies (Sep 2026–present, contract Editor in Chief of The Edge, its monthly newsletter for fleet and rental operators), Coen Construction (2025–present, Project Portfolio Manager, $8.5M portfolio),Hannaford (2025), Andyman Dessert Baking (2023–24), Naples Pizzeria (2020–23, Managing Partner), TSD Rental (2014–20) and Liberty Mutual (2010–14, 200+ processes for 3,000+ users). Early career (2002–09): IT staffing at Exsos, contract IT support at Technology Seed, $275K+/quarter enterprise sales at Datamonitor, and marketing ops at Bad Boy Entertainment. Open Career_History.log for the problem → architecture → result on each.";
+      if(hit("experience","history","career","worked")) return "Edgeball Strategies (Sep 2026–present, contract Editor in Chief of The Edge, its monthly newsletter for fleet and rental operators), Ciprari.AI (Aug 2026–present, founder: the practice behind ciprari.ai, ColeOS and the changelog), Coen Construction (2025–present, Project Portfolio Manager, $8.5M portfolio), Hannaford (2025), Andyman Dessert Baking (2023–24), Naples Pizzeria (2020–23, Managing Partner), TSD Rental (2014–20) and Liberty Mutual (2010–14, 200+ processes for 3,000+ users). Early career (2002–09): IT staffing at Exsos, contract IT support at Technology Seed, $275K+/quarter enterprise sales at Datamonitor, and marketing ops at Bad Boy Entertainment. Open Career_History.log for the problem → architecture → result on each.";
       if(hit("skill","stack","tech","tool")) return "Complex business systems and integration architecture at the core. React/Next.js, multi-tenant SaaS, Stripe Connect, Twilio, ONNX on-device vision, Base44, Claude Code and the OpenAI API, RPA, Primavera P6, Procore, Looker Studio. Open Skills.msc — every rating cites the thing it came from.";
       if(hit("contact","email","reach","hire me","call")) return "cole@ciprari.ai · (508) 688-5824 · Worcester, MA · linkedin.com/in/coleos. He's open to Systems Architect roles.";
-      if(hit("blog","changelog","posts","articles","newsletter","writes about")) return "Cole writes at changelog.ciprari.ai — release notes from a résumé that ships updates. New posts Monday, Wednesday and Friday, plus the Sunday Rollout Report on the week's AI and tech news. Open the Changelog icon on the desktop, or subscribe to the newsletter there.";
+      if(hit("blog","changelog","posts","articles","newsletter","writes about")) return "Cole writes at changelog.ciprari.ai — release notes from a résumé that ships updates. A new post every day; Sunday's is the Rollout Report on the week's AI and tech news. Open the Changelog icon on the desktop, or subscribe to the newsletter there.";
       if(hit("resume","cv","pdf")) return "Four pages, early career included. Open Resume.pdf on the desktop — it renders inline and scrolls, or you can download it.";
       return null;
     }
@@ -3834,7 +3844,8 @@ coleai:()=>openWindow({id:"coleai",title:"ColeAI",icon:IC.ai,w:660,h:560,route:"
           target.textContent=a||"That one needs the live endpoint — I only carry a local knowledge base right now. Try asking about his platforms, complex business systems, Base44, AI work, experience, skills, or how to reach him.";
         }
       }catch(e){
-        target.textContent="Couldn't reach the endpoint ("+(e.message||"error")+"). Falling back to the local knowledge base — try asking about his platforms or experience.";
+        const a=localAnswer(q);
+        target.textContent=a||("Couldn't reach the endpoint ("+(e.message||"error")+"). Try asking about his platforms or experience — those have offline answers.");
         dot.classList.add("off");
       }
       busy=false; if(sb[1]) sb[1].textContent=ep?"connected":"local mode";
@@ -5869,12 +5880,13 @@ scandisk:()=>{
     ["Scanning /experience …","c"],["  2010–2014 Liberty Mutual … verified"],
     ["  2014–2020 TSD Rental … verified"],["  2020–2023 Naples Pizzeria … verified"],
     ["  2023–2024 Andyman … verified"],["  2025 Hannaford / Washville … verified"],
-    ["  2025– Coen Construction … verified"],["  2026– Edgeball Strategies … verified"],
+    ["  2025– Coen Construction … verified"],["  2026– Ciprari.AI … verified"],
+    ["  2026– Edgeball Strategies … verified"],
     ["Scanning /platforms …","c"],["  13 volumes mounted, 0 unreachable"],
     ["Verifying /processes (240+) …","c"],["  200 Liberty Mutual SOPs … intact"],
     ["  40 Andyman SOPs … intact"],
     ["Checking cross-links …","c"],["  every claim → a shipped artefact … OK"],
-    ["Analysing fragmentation …","c"],["  job titles fragmented across 6 employers","w"],
+    ["Analysing fragmentation …","c"],[`  job titles fragmented across ${ROLES.length} employers`,"w"],
     ["  underlying discipline: contiguous","w"],
     ["Scan complete.","c"]
   ];
