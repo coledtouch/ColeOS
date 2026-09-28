@@ -24,6 +24,9 @@ const fs = require("fs"), path = require("path"), crypto = require("crypto"), vm
 
 const API = "https://coleos-api.coleciprari.workers.dev";
 const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+// Cloudflare Web Analytics: the edge injects the beacon from the first host into every
+// HTML page, and it reports to the second. Without both, the policy silently blocks it.
+const CF_BEACON = "https://static.cloudflareinsights.com", CF_RUM = "https://cloudflareinsights.com";
 const SKIP_DIRS = new Set([".git", ".github", ".claude", ".wrangler", "_src", "node_modules"]);
 const MAX_LINE = 2000;   // Cloudflare's per-line limit for _headers
 
@@ -65,12 +68,12 @@ function sitePolicy(hashes) {
   return [
     "default-src 'self'",
     // The pdf.js path covers pdf.min.js and the worker it imports from a blob: wrapper.
-    `script-src 'self' ${hashes.join(" ")} ${PDFJS}`,
+    `script-src 'self' ${hashes.join(" ")} ${PDFJS} ${CF_BEACON}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     // 'self' is load-bearing twice: the résumé PDF viewer, and the service worker, whose
     // own fetches follow the policy served with /sw.js.
-    `connect-src 'self' ${API}`,
+    `connect-src 'self' ${API} ${CF_RUM}`,
     // https: because the ColeScape browser opens any site you type; 'self' for /sandbox.
     "frame-src 'self' https:",
     "worker-src 'self' blob:",
