@@ -7,7 +7,11 @@
  * resume.html, status.html (and the worker, if you pass it) — is rewritten to N,
  * keeping each spot's own form: numeric "12" stays numeric, "Twelve"/"twelve"
  * stays a word. Anything still carrying a different number in a "platforms"
- * phrase is listed for review at the end.
+ * phrase is listed for review at the end — including numbers that markup
+ * splits from the word (<b>8</b><span>Platforms shipped</span>, a table cell
+ * after "Platforms shipped"). Those sit in template literals, so the fix is
+ * ${PRODUCTS.length}, not a rewrite; the review list is there to catch a
+ * hard-coded one creeping back.
  *
  *   node _src/sync-count.js                               # sync the site
  *   node _src/sync-count.js ../coleos-api/src/worker.js   # ...and the worker
@@ -35,6 +39,8 @@ const RULES = [
   [new RegExp(`\\b${NUM} production platforms`, "g"),        (m, t) => `${form(t)} production platforms`],
   [new RegExp(`\\b${NUM} other production platforms`, "g"),  (m, t) => `${form(t)} other production platforms`],
   [new RegExp(`\\b${NUM} live platforms`, "g"),              (m, t) => `${form(t)} live platforms`],
+  [new RegExp(`\\b${NUM} shipped platforms`, "g"),           (m, t) => `${form(t)} shipped platforms`],
+  [new RegExp(`\\ball ${NUM} of (these|the) platforms`, "g"), (m, t, k) => `all ${form(t)} of ${k} platforms`],
   [new RegExp(`\\b${NUM} platforms\\b`, "g"),                (m, t) => `${form(t)} platforms`],
   [new RegExp(`\\b${NUM} volumes (ready|mounted)`, "g"),     (m, t, k) => `${form(t)} volumes ${k}`],
   [new RegExp(`\\b${NUM}, all live`, "g"),                   (m, t) => `${form(t)}, all live`],
@@ -54,11 +60,20 @@ for (const f of files) {
 }
 console.log(`platform count = ${N} (${w}) — ${total} change(s)${CHECK ? " pending" : ""}`);
 
-const stale = new RegExp(`\\b(\\d+|${WORDS.slice(1).map(x => cap(x) + "|" + x).join("|")})\\s+(?:production |live |other production )?platforms\\b`, "g");
+const GAP = "(?:\\s|<[^>]+>)+";   // whitespace and/or tags: "12</span>      platforms"
+const STALE = [
+  new RegExp(`\\b${NUM}${GAP}(?:production |live |other production |shipped )?[Pp]latforms\\b`, "g"),
+  new RegExp(`\\ball ${NUM} of (?:these|the) platforms\\b`, "g"),
+  new RegExp(`[Pp]latforms shipped[^<]*(?:<[^>]+>\\s*)+${NUM}\\s*<`, "g"),   // <td>Platforms shipped</td><td>8</td>
+];
 for (const f of files) {
-  const s = fs.readFileSync(f, "utf8"); let m;
-  while ((m = stale.exec(s))) {
-    const v = m[1], asN = /^\d+$/.test(v) ? +v : WORDS.indexOf(v.toLowerCase());
-    if (asN !== N) console.log(`  review ${path.relative(ROOT, f)}: "${m[0]}"`);
+  const s = fs.readFileSync(f, "utf8");
+  for (const re of STALE) {
+    let m;
+    while ((m = re.exec(s))) {
+      const v = m[1], asN = /^\d+$/.test(v) ? +v : WORDS.indexOf(v.toLowerCase());
+      const line = s.slice(0, m.index).split("\n").length;
+      if (asN !== N) console.log(`  review ${path.relative(ROOT, f)}:${line}: "${m[0].replace(/\s+/g, " ")}"`);
+    }
   }
 }

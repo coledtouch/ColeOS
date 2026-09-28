@@ -5,7 +5,7 @@ Everything in this folder is version-controlled but excluded from the site deplo
 
 | file | what it is |
 |---|---|
-| `sync-count.js` | **One source of truth for the platform count.** Reads `PRODUCTS` in `index.html` and rewrites every hand-written count (meta, JSON-LD, noscript, terminal, ColeAI, boot lines, ask/, resume, status). `node _src/sync-count.js ../coleos-api/src/worker.js` also syncs the worker. `--check` = report only. |
+| `sync-count.js` | **One source of truth for the platform count.** Reads `PRODUCTS` in `index.html` and rewrites every hand-written count (meta, JSON-LD, noscript, terminal, ColeAI, boot lines, ask/, resume, status). `node _src/sync-count.js ../coleos-api/src/worker.js` also syncs the worker. `--check` = report only. It also lists, for review, any other number next to "platforms" — including one that markup splits from the word (`<b>8</b><span>Platforms shipped`). Those live in template literals: use `${PRODUCTS.length}` there, never a literal. |
 | `ci-deploy.js` | What the GitHub Action runs: applies the Adviser's staged edits, builds the security headers, stamps `sw.js`, publishes to Cloudflare, clears the queue, commits back. |
 | `security-headers.js` | **The site's security headers** (CSP, HSTS, nosniff, frame and referrer rules), generated at every deploy because the Content-Security-Policy pins each page's inline `<script>` by SHA-256. Every deploy path calls it; a deploy that skipped it would ship without headers. `node _src/security-headers.js` prints the rules, `--write` writes `./_headers` for `wrangler dev` (gitignored, never uploaded as a file). Adding an inline script or a new outside host? It just works for inline scripts; outside hosts go in `sitePolicy()`. App Builder apps run in `/sandbox.html`, which has its own permissive, opaque-origin policy. |
 | `resume-print.html` | Print source of the PDF résumé (WeasyPrint). Edit here, then `make_pdf.sh`. |
@@ -22,7 +22,7 @@ runs `sync-count.js` itself, so every count updates on its own. Review in Change
 
 **By hand:**
 
-1. Add the entry to `PRODUCTS` in `index.html` (and a `SITES` line in the worker for uptime).
+1. Add the entry to `PRODUCTS` in `index.html` (and a `SITES` line in the worker for uptime). The ticker, console and status page label the checks "N platforms + 3 services": ciprari.ai, changelog and coleos-api are the services. If a new `SITES` line is a service rather than a platform, add its name to `UP_SERVICES` in `index.html` and `SERVICES` in `status.html`.
 2. Counts fix themselves at deploy (`ci-deploy.js` and `deploy-staged.js` both run `sync-count.js`). To sync the worker too, run `node _src/sync-count.js ../coleos-api/src/worker.js` locally.
 3. Add the project's line to `resume.html`, `_src/resume-print.html`, `ask/what-has-cole-built.html`, the noscript list and the ColeAI "all live:" sentence (prose, not counts).
 4. `python3 _src/make_og.py` and `bash _src/make_pdf.sh` (WSL).

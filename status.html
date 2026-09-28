@@ -10,7 +10,7 @@
 <link rel="canonical" href="https://ciprari.ai/status">
 <link rel="icon" href="/favicon.ico">
 <meta property="og:title" content="Status — live checks on every Cole Ciprari platform">
-<meta property="og:description" content="Is it down? Live status of ciprari.ai and 13 other production platforms, checked from the edge.">
+<meta property="og:description" content="Is it down? Live status of all 13 production platforms, plus ciprari.ai, the changelog and the API, checked from the edge.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ciprari.ai/status">
 <meta property="og:site_name" content="ciprari.ai">
@@ -160,14 +160,24 @@ mark();setTimeout(function(){k.classList.remove("open");},250);});});
   var API = "https://coleos-api.coleciprari.workers.dev";
   var banner = document.getElementById("banner"), rows = document.getElementById("rows");
   function esc(s){ var d=document.createElement("div"); d.textContent=String(s); return d.innerHTML; }
+  /* The checks cover every platform plus three services that aren't platforms:
+     this site, the changelog and the API. "13 platforms + 3 services". */
+  var SERVICES = ["ciprari.ai", "changelog", "coleos-api"];
+  function tally(list){
+    var s = list.filter(function(c){ return SERVICES.indexOf(c.name) >= 0; }).length,
+        p = list.length - s, out = [];
+    if (p || !s) out.push(p + " platform" + (p===1?"":"s"));
+    if (s) out.push(s + " service" + (s===1?"":"s"));
+    return out.join(" + ");
+  }
   function draw(data){
     var checks = (data && data.checks) || [];
     var down = checks.filter(function(c){ return !c.ok; });
     banner.className = down.length ? "bad" : "";
     banner.innerHTML = down.length
-      ? "<b>" + down.length + " platform" + (down.length>1?"s":"") + " down</b> — " +
+      ? "<b>" + tally(down) + " down</b> — " +
         esc(down.map(function(c){return c.name;}).join(", ")) + ". The robot has been notified."
-      : "<b>All " + checks.length + " platforms operational.</b> Checked " +
+      : "<b>All " + tally(checks) + " operational.</b> Checked " +
         esc(new Date(data.at).toLocaleTimeString()) + ".";
     rows.innerHTML = checks.map(function(c){
       return '<div class="row"><span class="dot' + (c.ok?"":" bad") + '"></span>' +

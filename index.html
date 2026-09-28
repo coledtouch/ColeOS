@@ -3432,7 +3432,7 @@ certs:()=>openWindow({id:"certs",title:"Certificates",icon:IC.cert,w:600,h:360,r
 pc:()=>openWindow({id:"pc",title:"My Computer",icon:IC.pc,w:560,h:340,route:"pc",
   menu:["File","Edit","View","Help"],bodyClass:"paper",status:["System: ColeOS 1.0","6 drives"],
   html:`<table class="lv"><thead><tr><th>Resource</th><th>Capacity</th><th>Status</th></tr></thead><tbody>
-    <tr><td>Platforms shipped (solo)</td><td>8</td><td class="ok">Live</td></tr>
+    <tr><td>Platforms shipped (solo)</td><td>${PRODUCTS.length}</td><td class="ok">Live</td></tr>
     <tr><td>Portfolio under architecture</td><td>$8.5M</td><td class="ok">Active</td></tr>
     <tr><td>Users served by systems built</td><td>3,000+</td><td class="ok">Online</td></tr>
     <tr><td>Processes documented</td><td>240+</td><td class="ok">Versioned</td></tr>
@@ -3490,12 +3490,6 @@ Black, no sugar. This is the correct answer and it is not up for discussion.`,
 <span class="mu">Try: build</span>`,
       exit:()=>`There's no exit. There's only <span class="c1">open contact</span>.
 <span class="mu">(Or the X in the corner, if you must.)</span>`,
-      ls:()=>`drwxr-xr-x  cole  cole  13 platforms/
-drwxr-xr-x  cole  cole  36 changelog-posts/
-drwxr-xr-x  cole  cole  15 years-of-experience/
--rw-r--r--  cole  cole   1 resume.pdf
--rw-------  cole  cole   0 excuses.txt      <span class="mu">(empty)</span>
-<span class="mu">Try: open documents</span>`,
       whoareyou:()=>CMDS.whoami(),
       hello:()=>`Hello. You're in a terminal inside a résumé. That was a choice you made.
 <span class="mu">Try: help — or fit, if you're hiring</span>`,
@@ -3575,7 +3569,7 @@ a person approves. In a business with real liability that isn't optional.
 
 Prompts are built as stateless workers so any run is reproducible and auditable.
 <span class="mu">Claude Code Certified · OpenAI Certified Architect</span>`,
-      impact:()=>`<span class="ok">12</span>      platforms shipped solo             <span class="mu">architecture + build + deploy</span>
+      impact:()=>`<span class="ok">${PRODUCTS.length}</span>      platforms shipped solo             <span class="mu">architecture + build + deploy</span>
 <span class="ok">$8.5M</span>   portfolio under architecture       <span class="mu">Coen Construction</span>
 <span class="ok">3,000+</span>  users served by systems built      <span class="mu">Liberty Mutual SOP/RPA architecture</span>
 <span class="ok">70%</span>     manual data entry eliminated       <span class="mu">Andyman POS integration</span>
@@ -5636,7 +5630,7 @@ wizard:()=>{
       say:"Opening the résumé, profile and career history. If you only read one thing, read the platforms on page one of the PDF."},
     engineer:{
       t:"I'm an engineer or technical lead",
-      d:"The eight shipped platforms, the architecture diagrams, and a terminal if you'd rather type than click.",
+      d:"The thirteen shipped platforms, the architecture diagrams, and a terminal if you'd rather type than click.",
       open:["projects","arch","term"],
       say:"Opening the platforms, the architecture explorer and a terminal. Click any node in a diagram to see why it's there."},
     browsing:{
@@ -5819,7 +5813,7 @@ taskman:()=>{
           view.innerHTML=`<div class="perf">
             <div class="perfg"><canvas></canvas></div>
             <div class="perfl">
-              <div class="perfc"><b>8</b><span>Platforms shipped</span></div>
+              <div class="perfc"><b>${PRODUCTS.length}</b><span>Platforms shipped</span></div>
               <div class="perfc"><b>$8.5M</b><span>Portfolio</span></div>
               <div class="perfc"><b>3,000+</b><span>Users served</span></div>
               <div class="perfc"><b>240+</b><span>Processes</span></div>
@@ -7473,7 +7467,7 @@ const BLUE={
   node:null, bubble:null, on:false, timer:null, sayT:null,
   LINES:[
     "Woo-woo!","I have opinions about this deploy.","That's scope creep and you know it.",
-    "Have you considered a walk instead?","I supervised all eight of these platforms.",
+    "Have you considered a walk instead?","I supervised all thirteen of these platforms.",
     "The review gate is me. I approve nothing.","Huskies don't bark. We negotiate.",
     "I shed on the keyboard during the ERP build.","Ship it. Then feed me.",
     "Nap scheduled. This is planned maintenance.","I'm not stubborn, I'm strongly opinionated.",
@@ -8101,9 +8095,10 @@ const ROOT9={
     }
     const rows=up.checks||[];
     const downs=rows.filter(c=>!c.ok).length;
+    const svc=rows.filter(c=>UP_SERVICES.includes(c.name)).length;
     main.innerHTML=`
       <div class="r9h">UPTIME</div>
-      <div class="r9sub">${rows.length} platforms · ${downs?downs+" DOWN":"all up"} · checked ${esc(new Date(up.at).toLocaleTimeString())}</div>
+      <div class="r9sub">${upLabel(rows.length,svc)} · ${downs?downs+" DOWN":"all up"} · checked ${esc(new Date(up.at).toLocaleTimeString())}</div>
       <table class="r9tbl"><thead><tr>
         <th style="width:20px"></th><th>Platform</th><th style="width:70px">Status</th>
         <th style="width:90px">Latency</th><th>Note</th></tr></thead><tbody>
@@ -8911,6 +8906,11 @@ PAL.init();
 /* =========================================================================
    LIVE TICKER — proof this is a running system, not a mockup
    ========================================================================= */
+/* The uptime checks (SITES in coleos-api) cover every platform plus three
+   services that aren't platforms: this site, the changelog and the API. */
+const UP_SERVICES=["ciprari.ai","changelog","coleos-api"];
+const upLabel=(total,svc=UP_SERVICES.length)=>{ const p=Math.max(0,(total||0)-svc);
+  return `${p} platform${p===1?"":"s"} + ${svc} service${svc===1?"":"s"}`; };
 const TICK={
   async load(){
     const box=$("#tick"); if(!box) return;
@@ -8927,8 +8927,8 @@ const TICK={
       box.innerHTML=
         `<div class="th"><span class="lv"></span>SYSTEM LIVE</div>`+
         `<div><b>${d.posts||0}</b> posts · <b>${d.postsThisMonth||0}</b> this month</div>`+
-        (d.uptime24h!=null?`<div><b>${d.uptime24h}%</b> uptime · ${d.of||0} platforms</div>`
-                          :`<div><b>${d.of||0}</b> platforms monitored</div>`)+
+        `<div>${d.uptime24h!=null?`<b>${d.uptime24h}%</b> uptime across`:"monitoring"}</div>`+
+        `<div>${upLabel(d.of)}</div>`+
         `<div><b>${d.visitorsToday||0}</b> visitors today</div>`+
         (d.latest?`<div class="tl" title="${esc(d.latest)}">↳ ${esc(String(d.latest).replace(/^v[\d.]+ — /,""))} ${esc(rel)}</div>`:"");
       box.onclick=()=>{
