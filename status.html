@@ -10,11 +10,11 @@
 <link rel="canonical" href="https://ciprari.ai/status">
 <link rel="icon" href="/favicon.ico">
 <meta property="og:title" content="Status — live checks on every Cole Ciprari platform">
-<meta property="og:description" content="Is it down? Live status of all 13 production platforms, plus ciprari.ai, the changelog and the API, checked from the edge.">
+<meta property="og:description" content="Is it down? Live status of all 14 production platforms, plus ciprari.ai, the changelog and the API, checked from the edge.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ciprari.ai/status">
 <meta property="og:site_name" content="ciprari.ai">
-<meta property="og:image" content="https://ciprari.ai/og-image-v3.png">
+<meta property="og:image" content="https://ciprari.ai/og-image-v4.png">
 <meta name="theme-color" content="#070d0a">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebPage",
@@ -161,7 +161,7 @@ mark();setTimeout(function(){k.classList.remove("open");},250);});});
   var banner = document.getElementById("banner"), rows = document.getElementById("rows");
   function esc(s){ var d=document.createElement("div"); d.textContent=String(s); return d.innerHTML; }
   /* The checks cover every platform plus three services that aren't platforms:
-     this site, the changelog and the API. "13 platforms + 3 services". */
+     this site, the changelog and the API. "14 platforms + 3 services". */
   var SERVICES = ["ciprari.ai", "changelog", "coleos-api"];
   function tally(list){
     var s = list.filter(function(c){ return SERVICES.indexOf(c.name) >= 0; }).length,

@@ -10,8 +10,8 @@ Everything in this folder is version-controlled but excluded from the site deplo
 | `security-headers.js` | **The site's security headers** (CSP, HSTS, nosniff, frame and referrer rules), generated at every deploy because the Content-Security-Policy pins each page's inline `<script>` by SHA-256. Every deploy path calls it; a deploy that skipped it would ship without headers. `node _src/security-headers.js` prints the rules, `--write` writes `./_headers` for `wrangler dev` (gitignored, never uploaded as a file). Adding an inline script or a new outside host? It just works for inline scripts; outside hosts go in `sitePolicy()`. App Builder apps run in `/sandbox.html`, which has its own permissive, opaque-origin policy. |
 | `resume-print.html` | Print source of the PDF résumé (WeasyPrint). Edit here, then `make_pdf.sh`. |
 | `make_pdf.sh` | Rebuilds `../Cole-Ciprari-Systems-Architect-Resume.pdf` (run in WSL). |
-| `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v3.png`. |
-| `make_banner.py` | LinkedIn cover banner generator (1584×396). Change the `"12"` string, run in WSL, upload the PNG. |
+| `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v4.png`. |
+| `make_banner.py` | LinkedIn cover banner generator (1584×396). Change the count string (`"14"`, both occurrences), run in WSL, upload the PNG. |
 
 ## Adding a platform (the whole checklist, now)
 
