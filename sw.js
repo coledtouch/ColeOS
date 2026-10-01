@@ -13,7 +13,7 @@
  *     Icons, the PDF and the OG image are content-addressed by deploy, so serving
  *     them from cache instantly is safe.
  */
-const VERSION = "4f9d33297de6";
+const VERSION = "236febd98b22";
 const SHELL = "coleos-shell-" + VERSION;
 const ASSETS = "coleos-assets-" + VERSION;
 
