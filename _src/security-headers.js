@@ -102,7 +102,9 @@ function buildHeaders(siteDir) {
     for (const h of inlineScripts(fs.readFileSync(path.join(siteDir, f), "utf8"), f)) hashes.add(h);
   }
   const common = [
-    "Strict-Transport-Security: max-age=31536000; includeSubDomains",
+    // Matches the ciprari.ai zone's edge HSTS setting, which overrides this header anyway and
+    // deliberately leaves out includeSubDomains (Cole's call), so the code says what is served.
+    "Strict-Transport-Security: max-age=31536000",
     "X-Content-Type-Options: nosniff",
     "Referrer-Policy: strict-origin-when-cross-origin",
     "Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), bluetooth=(), hid=(), midi=()",
