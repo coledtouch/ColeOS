@@ -6487,12 +6487,13 @@ browser:(startQ)=>{
           const host=u.replace(/^https?:\/\//i,"").split(/[/?#]/)[0];
           url.value=u.replace(/^https?:\/\//i,"");
           if(sb[1]) sb[1].textContent=host;
-          /* sites that send X-Frame-Options: DENY — show a period-correct notice instead of a dead frame */
-          const NOFRAME=["atelier.ciprari.ai","keepfixcut.com","www.keepfixcut.com","permitsketch.com","www.permitsketch.com","estimate.pro","www.estimate.pro","myaurora.base44.app","jetdesk.ai","www.jetdesk.ai","meridian-flight-desk.pages.dev"];
+          /* sites that send X-Frame-Options: DENY or SAMEORIGIN — show a period-correct notice instead of a dead frame */
+          const NOFRAME=["atelier.ciprari.ai","keepfixcut.com","www.keepfixcut.com","permitsketch.com","www.permitsketch.com","estimate.pro","www.estimate.pro","myaurora.base44.app","jetdesk.ai","www.jetdesk.ai","meridian-flight-desk.pages.dev","showitwithwords.com","www.showitwithwords.com"];
+          const SAMEORIGIN=["showitwithwords.com","www.showitwithwords.com"];
           if(NOFRAME.includes(host)){
             const pi=PRODUCTS.findIndex(x=>x.d===host||x.u.includes(host));
             view.innerHTML=`<div class="webdeny">
-              <div class="webdeny-code">403 · X-FRAME-OPTIONS: DENY</div>
+              <div class="webdeny-code">403 · X-FRAME-OPTIONS: ${SAMEORIGIN.includes(host)?"SAMEORIGIN":"DENY"}</div>
               <h3>This site refuses to appear in other people's windows.</h3>
               <p>${esc(host)} ships a strict security policy (as it should — Cole wrote it).
               It won't render inside a frame, even a charming retro one.</p>
