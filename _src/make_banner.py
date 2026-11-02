@@ -10,9 +10,21 @@ Design notes:
   * LinkedIn's avatar circle covers roughly x 80-290 in the lower half, and
     mobile crops the sides — so all load-bearing text lives between x 430-1500
     and y 90-300. The left third is deliberately atmospheric.
+
+    python3 _src/make_banner.py          # count derived from PRODUCTS in index.html
+    python3 _src/make_banner.py 16       # or explicit
 """
+import os, re, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import numpy as np
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if len(sys.argv) > 1:
+    N = sys.argv[1]
+else:
+    idx = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    body = re.search(r"const PRODUCTS=\[([\s\S]*?)\n\];", idx).group(1)
+    N = str(len(re.findall(r'^\s*\{n:"', body, re.M)))
 
 S = 3                                  # supersample factor
 W, H = 1584 * S, 396 * S
@@ -97,8 +109,8 @@ d0.text((x0 * S, 178 * S), "ARCHITECT", font=f(SANSB, 45), fill=INK)
 d0.rectangle([x0 * S, 235 * S, (x0 + 74) * S, 238 * S], fill=GREEN)
 
 # the numbers that matter
-d0.text((x0 * S, 253 * S), "14", font=f(MONOB, 27), fill=GREEN)
-w12 = d0.textlength("14", font=f(MONOB, 27))
+d0.text((x0 * S, 253 * S), N, font=f(MONOB, 27), fill=GREEN)
+w12 = d0.textlength(N, font=f(MONOB, 27))
 d0.text((x0 * S + w12 + 10 * S, 259 * S), "production platforms shipped solo",
         font=f(MONO, 18), fill=DIM)
 
