@@ -13,6 +13,8 @@ Design notes:
 
     python3 _src/make_banner.py          # count derived from PRODUCTS in index.html
     python3 _src/make_banner.py 16       # or explicit
+
+Writes _src/linkedin-banner-v5.png. _src/ never deploys and .gitignore skips the PNG.
 """
 import os, re, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -160,5 +162,6 @@ img = Image.fromarray(np.clip(arr, 0, 255).astype(np.uint8))
 
 # ---------------------------------------------------------------- down-sample
 out = img.resize((1584, 396), Image.LANCZOS)
-out.save("linkedin-banner-v5.png")
-print("wrote linkedin-banner-v5.png", out.size)
+OUT = os.path.join(ROOT, "_src", "linkedin-banner-v5.png")   # not the site root: a deploy would publish it
+out.save(OUT)
+print("wrote", os.path.relpath(OUT, ROOT), out.size)

@@ -11,7 +11,7 @@ Everything in this folder is version-controlled but excluded from the site deplo
 | `resume-print.html` | Print source of the PDF résumé (WeasyPrint). Edit here, then `make_pdf.sh`. |
 | `make_pdf.sh` | Rebuilds `../Cole-Ciprari-Systems-Architect-Resume.pdf` (run in WSL). |
 | `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v5.png`. |
-| `make_banner.py` | LinkedIn cover banner generator (1584×396). Reads the count from `PRODUCTS` in `index.html` (or pass one: `python3 _src/make_banner.py 16`). Run in WSL and upload the PNG. |
+| `make_banner.py` | LinkedIn cover banner generator (1584×396). Reads the count from `PRODUCTS` in `index.html` (or pass one: `python3 _src/make_banner.py 16`). Run in WSL. It writes `_src/linkedin-banner-v5.png`, which is gitignored and never deployed. Upload that PNG to LinkedIn. |
 
 ## Adding a platform (the whole checklist, now)
 
@@ -25,5 +25,5 @@ runs `sync-count.js` itself, so every count updates on its own. Review in Change
 1. Add the entry to `PRODUCTS` in `index.html` (and a `SITES` line in the worker for uptime). The ticker, console and status page label the checks "N platforms + 3 services": ciprari.ai, changelog and coleos-api are the services. If a new `SITES` line is a service rather than a platform, add its name to `UP_SERVICES` in `index.html` and `SERVICES` in `status.html`.
 2. Counts fix themselves at deploy (`ci-deploy.js` and `deploy-staged.js` both run `sync-count.js`). To sync the worker too, run `node _src/sync-count.js ../coleos-api/src/worker.js` locally.
 3. Add the project's line to `resume.html`, `_src/resume-print.html`, `ask/what-has-cole-built.html`, the noscript list and the ColeAI "all live:" sentence (prose, not counts).
-4. `python3 _src/make_og.py`, `python3 _src/make_banner.py` (upload the PNG to LinkedIn) and `bash _src/make_pdf.sh` (WSL).
+4. `python3 _src/make_og.py`, `python3 _src/make_banner.py` (upload `_src/linkedin-banner-v5.png` to LinkedIn) and `bash _src/make_pdf.sh` (WSL).
 5. Commit, push → the Action deploys. Or `node deploy/deploy-site.js`.

@@ -13,3 +13,6 @@ desktop.ini
 # generated at deploy by _src/security-headers.js
 _headers
 .wrangler/
+
+# written by _src/make_banner.py, uploaded to LinkedIn by hand
+_src/linkedin-banner*.png
