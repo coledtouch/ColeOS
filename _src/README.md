@@ -10,7 +10,7 @@ Everything in this folder is version-controlled but excluded from the site deplo
 | `security-headers.js` | **The site's security headers** (CSP, HSTS, nosniff, frame and referrer rules), generated at every deploy because the Content-Security-Policy pins each page's inline `<script>` by SHA-256. Every deploy path calls it; a deploy that skipped it would ship without headers. `node _src/security-headers.js` prints the rules, `--write` writes `./_headers` for `wrangler dev` (gitignored, never uploaded as a file). Adding an inline script or a new outside host? It just works for inline scripts; outside hosts go in `sitePolicy()`. App Builder apps run in `/sandbox.html`, which has its own permissive, opaque-origin policy. |
 | `resume-print.html` | Print source of the PDF résumé (WeasyPrint). Edit here, then `make_pdf.sh`. |
 | `make_pdf.sh` | Rebuilds `../Cole-Ciprari-Systems-Architect-Resume.pdf` (run in WSL). |
-| `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v5.png`. |
+| `og-base.png` + `make_og.py` | The social card and a patcher that redraws its platform number → `../og-image-v6.png`. |
 | `make_banner.py` | LinkedIn cover banner generator (1584×396). Reads the count from `PRODUCTS` in `index.html` (or pass one: `python3 _src/make_banner.py 16`). Run in WSL. It writes `_src/linkedin-banner-v5.png`, which is gitignored and never deployed. Upload that PNG to LinkedIn. |
 
 ## Adding a platform (the whole checklist, now)
