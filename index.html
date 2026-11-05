@@ -3122,7 +3122,7 @@ about:()=>openWindow({id:"about",title:"About Cole — Properties",icon:IC.user,
 
 projects:()=>openWindow({id:"projects",title:"My Projects",icon:IC.folder,w:610,h:410,
   menu:["File","Edit","View","Help"],bodyClass:"paper",
-  status:[`${PRODUCTS.length} object(s)`,`${PRODUCTS.length} live`],
+  status:[`${PRODUCTS.length} object(s)`,`${PRODUCTS.filter(p=>!p.st).length} live`],
   route:"projects",
   html:`<div class="fgrid">${PRODUCTS.map((p,i)=>
     `<button class="fitem" data-i="${i}">${p.star?IC.chart(32):IC.net(32)}<span class="fl">${esc(p.n)}</span></button>`).join("")}</div>`,
@@ -3135,7 +3135,7 @@ projects:()=>openWindow({id:"projects",title:"My Projects",icon:IC.folder,w:610,
         e.preventDefault(); e.stopPropagation(); sel();
         ctxMenu(e.clientX,e.clientY,[
           {t:"Open",fn:()=>APPS.project(i)},
-          {t:"Open live site",fn:()=>window.open(PRODUCTS[i].u,"_blank","noopener")},
+          ...(PRODUCTS[i].u?[{t:"Open live site",fn:()=>window.open(PRODUCTS[i].u,"_blank","noopener")}]:[]),
           {t:"Copy deep link",fn:()=>copyLink("projects/"+slugify(PRODUCTS[i].n),PRODUCTS[i].n)},
           {t:"Properties",fn:()=>APPS.props(i)}
         ]);
@@ -3146,7 +3146,7 @@ projects:()=>openWindow({id:"projects",title:"My Projects",icon:IC.folder,w:610,
 project:(i)=>{
   const p=PRODUCTS[i];
   return openWindow({id:"proj-"+i,title:p.n,icon:IC.net,w:640,h:460,route:"projects/"+slugify(p.n),
-    menu:["File","View","Help"],bodyClass:"paper",status:[p.c,"Live"],
+    menu:["File","View","Help"],bodyClass:"paper",status:[p.c,p.st||"Live"],
     html:`<div class="pad">
       <h3 class="ah">${esc(p.n)}</h3>
       <p class="ap" style="font-weight:bold;margin-bottom:6px">${p.big}</p>
@@ -3157,8 +3157,8 @@ project:(i)=>{
       <ul class="bl">${p.f.map(f=>`<li>${f}</li>`).join("")}</ul>
     </div>
     <div class="linkbar">
-      <a class="lnk" href="${p.u}" target="_blank" rel="noopener">${esc(p.d)} &#8599;</a>
-      <button class="btn95 golive">Open live site</button>
+      ${p.u?`<a class="lnk" href="${p.u}" target="_blank" rel="noopener">${esc(p.d)} &#8599;</a>
+      <button class="btn95 golive">Open live site</button>`:`<span class="lnk">${esc(p.d)} · ${esc(p.st||"no public link")}</span>`}
       <button class="btn95 a-link">Copy deep link</button>
       <button class="btn95 a-props">Properties</button>
     </div>`,
@@ -3845,9 +3845,10 @@ coleai:()=>openWindow({id:"coleai",title:"ColeAI",icon:IC.ai,w:660,h:560,route:"
       if(hit("jetdesk","meridian","flight","aviation","plane","airplane","aircraft","pilot")) return "JetDesk.AI is Cole's offline-first flight-planning PWA for a PA-46 turboprop. The entire FAA airport database ships inside one file, legs are corrected by forecast winds aloft, a fuel-stop optimizer weighs detours against price, and METAR/TAF feeds drive per-runway wind verdicts. Fuel prices logged on one phone sync to every phone behind a PIN, via Cloudflare Pages Functions. Open My Projects to see it.";
       if(hit("bracelet","jewelry","jewellery","show it with words","audrey","storefront")) return "Show It With Words is the storefront Cole built for his mother Audrey's handmade bracelet business (on Etsy since 2014, 4.9 stars). Every product is drawn live as SVG — no stock art — and a six-step build-your-own wizard renders your exact word on the bracelet, tote or keyring as you type, with cart, bundle pricing and a provider-ready checkout. Open My Projects to see it.";
       if(hit("base44")) return "Three shipped Base44 apps: Aurora (IPTV and smart-home control), Northern Hardy Honey (apiary e-commerce) and Mari' Cosmetics (D2C with a guided shade matcher). The work there is entity schema design and data modelling — channels, devices, scenes, products, orders and booking state machines — plus connector integrations and deployment.";
-      /* a domain stem counts only if it is long, not a plain word, and not part of another product's name or domain */
-      const stem=x=>{const s=x.d.split(".")[0].replace(/-/g," ");return s.length>5&&!["estimate"].includes(s)&&!PRODUCTS.some(y=>y!==x&&(y.n.toLowerCase().includes(s)||y.d.includes(s)))?[s]:[];};
-      const pr=PRODUCTS.find(x=>{const n=x.n.toLowerCase();return hit(n,n.replace(/\./g," "),x.d,...stem(x));});
+      /* a domain stem counts only if it is long, not a plain word, and not part of another product's name or domain.
+         A product with no public link has a label in d, not a domain, so it has no stem. */
+      const stem=x=>{if(!x.u)return [];const s=x.d.split(".")[0].replace(/-/g," ");return s.length>5&&!["estimate"].includes(s)&&!PRODUCTS.some(y=>y!==x&&(y.n.toLowerCase().includes(s)||y.d.includes(s)))?[s]:[];};
+      const pr=PRODUCTS.find(x=>{const n=x.n.toLowerCase();return hit(n,n.replace(/\./g," "),...(x.u?[x.d]:[]),...stem(x));});
       if(pr) return `${pr.n} (${pr.d}): ${pr.big} My Projects has the full write-up.`;
       if(hit("hire","why you","why should","edge over")) return "Because you get the architect and the engineer in one seat. Cole has shipped 15 production platforms solo — including a 120-route ERP with payroll, telephony and payments — while carrying P&L for an $8.5M portfolio. He justifies the build in business terms, writes it, then makes people actually use it.";
       if(hit("complex business system","erp")) return "That's the through-line. Cole's systems span finance, field operations, HR, compliance and customers simultaneously. The Coen ERP ties estimating, payroll, telephony, dispatch and P&L into one coherent data model across 120+ routes — no orphaned data paths between them.";
@@ -5779,7 +5780,7 @@ props:(i)=>{
       <hr class="r95">
       <table class="lv" style="font-size:11.5px"><tbody>
         <tr><td style="width:38%;color:#555">Type</td><td>${esc(p.c)} · production</td></tr>
-        <tr><td style="color:#555">Status</td><td class="ok">Live</td></tr>
+        <tr><td style="color:#555">Status</td><td${p.st?"":` class="ok"`}>${esc(p.st||"Live")}</td></tr>
         <tr><td style="color:#555">Built by</td><td>Cole Ciprari — sole architect &amp; engineer</td></tr>
         <tr><td style="color:#555">Documented features</td><td>${p.f.length}</td></tr>
         <tr><td style="color:#555">Stack items</td><td>${p.t.length}</td></tr>
@@ -5791,13 +5792,13 @@ props:(i)=>{
       <div class="bptags" style="margin-top:11px">${p.t.map(t=>`<span class="bptag">${esc(t)}</span>`).join("")}</div>
       <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:13px">
         <button class="btn95 a-open">Open</button>
-        <button class="btn95 a-live">Live site &#8599;</button>
+        ${p.u?`<button class="btn95 a-live">Live site &#8599;</button>`:""}
         <button class="btn95 a-copy">Copy deep link</button>
       </div>
     </div>`,
     onMount(body){
       body.querySelector(".a-open").onclick=()=>APPS.project(i);
-      body.querySelector(".a-live").onclick=()=>window.open(p.u,"_blank","noopener");
+      const lv=body.querySelector(".a-live"); if(lv) lv.onclick=()=>window.open(p.u,"_blank","noopener");
       body.querySelector(".a-copy").onclick=()=>copyLink("projects/"+sl,p.n);
     }});
 },
@@ -6474,7 +6475,7 @@ browser:(startQ)=>{
               <div class="bpk">${esc(pr.c)} &nbsp;·&nbsp; built &amp; shipped solo</div>
               <h2>${esc(pr.n)}</h2>
               <p>${esc(pr.big)}</p>
-              <a class="bpurl" href="${pr.u}" target="_blank" rel="noopener">${esc(pr.d)} &#8599; open the real site</a>
+              ${pr.u?`<a class="bpurl" href="${pr.u}" target="_blank" rel="noopener">${esc(pr.d)} &#8599; open the real site</a>`:`<span class="bpurl">${esc(pr.d)} · ${esc(pr.st||"no public link")}</span>`}
             </div>
             <div class="bpbody">
               <p style="font-size:13px;line-height:1.7;color:#333;margin-bottom:14px">${esc(pr.b)}</p>
@@ -6482,12 +6483,12 @@ browser:(startQ)=>{
               <h3>What I built</h3>
               <ul>${pr.f.map(f=>`<li>${f}</li>`).join("")}</ul>
               <div class="bpacts">
-                <button class="btn95 a-live">Open live site &#8599;</button>
+                ${pr.u?`<button class="btn95 a-live">Open live site &#8599;</button>`:""}
                 <button class="btn95 a-all">All 15 platforms</button>
                 <button class="btn95 a-cool">Back to Coolgle</button>
               </div>
             </div></div>`;
-          view.querySelector(".a-live").onclick=()=>nav({type:"web",u:pr.u});
+          const lv=view.querySelector(".a-live"); if(lv) lv.onclick=()=>nav({type:"web",u:pr.u});
           view.querySelector(".a-all").onclick=()=>APPS.projects();
           view.querySelector(".a-cool").onclick=()=>nav({type:"home"});
 
@@ -8883,7 +8884,7 @@ const PAL={
     it.push({t:"Install ColeOS",k:"system",run:()=>PWA.open()});
     it.push({t:"Root Console",k:"system",run:()=>ROOT9.open()});
     PRODUCTS.forEach((p,i)=>it.push({t:p.n,k:"project",run:()=>APPS.project(i)}));
-    PRODUCTS.forEach(p=>it.push({t:"Visit "+p.d,k:"link",run:()=>window.open(p.u,"_blank","noopener")}));
+    PRODUCTS.filter(p=>p.u).forEach(p=>it.push({t:"Visit "+p.d,k:"link",run:()=>window.open(p.u,"_blank","noopener")}));
     it.push({t:"The Changelog (blog)",k:"link",run:()=>window.open("https://changelog.ciprari.ai/","_blank","noopener")});
     it.push({t:"Live platform status",k:"link",run:()=>window.open("https://ciprari.ai/status","_blank","noopener")});
     this.items=it;
