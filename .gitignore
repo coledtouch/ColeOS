@@ -16,3 +16,4 @@ _headers
 
 # written by _src/make_banner.py, uploaded to LinkedIn by hand
 _src/linkedin-banner*.png
+_src/heroes/out/
