@@ -36,7 +36,7 @@ def qr(x, y, n=9, c=14):
     return s
 
 D = {}
-D["tuner"] = dict(cat="TV media player", name="Tuner", tag="One player, written natively for each TV platform.",
+D["tuner"] = dict(cat="TV media player", name="Tuner", tag="One player, written separately for each TV platform.",
   chips=["Kotlin", "Jetpack Compose", "Media3", "webOS", "Roku SceneGraph", "GitHub Actions"], foot="tunertv.app",
   svg=lambda: (
     '<rect x="70" y="20" width="560" height="330" rx="18" fill="#08110e" stroke="#3cf0b4" stroke-width="3"/>'
@@ -74,7 +74,7 @@ D["tma"] = dict(cat="Booster-club family app", name="TMA Family App", tag="Balan
     '<text x="520" y="430" class="cap">No separate database · no app store · installs from the browser</text>'))
 
 D["trader"] = dict(cat="Private trading assistant", name="AI Trader", tag="Two models must agree. Code checks the risk. Each order waits for approval.",
-  chips=["Python", "FastAPI", "Docker Compose", "Multi-model AI", "Risk management", "PWA"], foot="Personal software  ·  no public link",
+  chips=["Python", "FastAPI", "Multi-model AI", "Risk management", "PWA"], foot="Personal software  ·  no public link",
   svg=lambda: (
     box(0, 70, 190, 110, "Scanner", "a short list") +
     box(250, 10, 170, 100, "Claude") + box(250, 150, 170, 100, "Grok") +

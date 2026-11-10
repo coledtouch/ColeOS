@@ -1936,7 +1936,7 @@ button,.dicon,.si,.tsk,.tb95,.fbtn,.abtab,.tool,#startbtn{touch-action:manipulat
     <li><a href="https://myaurora.base44.app/">Aurora</a> — IPTV media control centre and smart-home orchestration, built on Base44.</li>
     <li><a href="https://hardy-hive-harvest.base44.app/">Northern Hardy Honey</a> — apiary e-commerce and education platform, built on Base44.</li>
     <li><a href="https://mariaelena.base44.app/">Mari' Cosmetics</a> — D2C storefront with a guided shade matcher, built on Base44.</li>
-    <li>AI Trader (private, no public link) — a self-hosted trading assistant for one Interactive Brokers account. Claude and Grok must agree by default. Risk caps live in code, and stop-losses are held at the broker.</li>
+    <li>AI Trader (private, no public link) — a private trading assistant for one Interactive Brokers account. Claude and Grok must agree by default. Risk caps live in code, and stop-losses are held at the broker.</li>
     <li>PocketPGP (no public link) — an offline PGP key manager for Android and Windows from one codebase. The Android app has no internet permission, and keys sync through one encrypted file.</li>
   </ul>
   <h2 style="font-size:19px;margin:20px 0 8px">Experience</h2>
@@ -2317,22 +2317,22 @@ const PRODUCTS=[
      "<b>No passwords</b> — sign in with a 6-digit code sent by email. A household registers itself, and the treasurer verifies it before any balances show",
      "<b>The treasurer keeps the sheet</b> — credits, checks and trip enrollments still go into one Google Sheet. Approvals, new-family review, announcements and reports are in the app's Board tools",
      "<b>Notifications by choice</b> — pick by school, ensemble and topic. A small Cloudflare Worker signs and encrypts each Web Push message itself (VAPID, aes128gcm, no Firebase). Email is built in",
-     "<b>Reminders and calendars</b> — automatic payment-due and concert-tomorrow reminders",
+     "<b>Reminders</b> — automatic payment-due and concert-tomorrow reminders",
      "<b>No separate database</b> — family data lives in TMA's own Google Sheet. The push Worker keeps no family information, and PayPal handles every card number",
      "<b>Demo mode</b> — the real backend logic runs in the browser on sample families, so anyone can try every screen without sending anything"],
   t:["PWA","React","Google Apps Script","Google Sheets Backend","Cloudflare Workers","Web Push","PayPal Checkout","Nonprofit"]},
- {n:"AI Trader",u:"",d:"self-hosted",c:"Trading Assistant / Self-hosted",st:"Private",
+ {n:"AI Trader",u:"",d:"personal software",c:"Trading Assistant",st:"Private",
   big:"A private trading assistant for one Interactive Brokers account. Claude and Grok must agree by default.",
-  b:"It scans a short list of liquid stocks every few minutes. It asks two AI models whether each setup is worth taking. Claude and Grok must agree by default before it buys. Every idea then passes a risk manager written in code. Every stock entry gets a stop-loss order held at the broker. It runs on its own server behind a Cloudflare Tunnel. The phone dashboard installs like an app. It is personal software, so there is no public link.",
+  b:"It scans a short list of liquid stocks every few minutes. It asks two AI models whether each setup is worth taking. Claude and Grok must agree by default before it buys. Every idea then passes a risk manager written in code. Every stock entry gets a stop-loss order held at the broker. The phone dashboard installs like an app. It is personal software, so there is no public link.",
   f:["<b>Two-model consensus</b> — Claude and Grok see the same data at the same time. A buy needs both, the smaller size wins, and either can close. One model or rules-only are options",
      "<b>Risk in code</b> — per-trade risk, a daily loss stop and hard caps that the AI can only scale down. After three losses in a row it trades smaller",
      "<b>Fee check</b> — it refuses a trade when fees would eat more than a quarter of the expected profit",
-     "<b>Stops at the broker</b> — each stock entry carries a stop-loss held at the broker, which works even with the server off. Stocks close 10 minutes before the bell",
-     "<b>Safety ladder</b> — a simulator and staged test modes come before real money. Real-money orders need a server flag, a live account and a fresh 2FA code. Autopilot is off by default, so each new order waits for approval",
+     "<b>Stops at the broker</b> — each stock entry carries a stop-loss held at the broker. Stocks close 10 minutes before the bell",
+     "<b>Approval first</b> — autopilot is off by default, so each new order waits for approval",
      "<b>Signal ledger</b> — every scanner signal is logged with why it was skipped and how the price moved 15, 30 and 60 minutes later and at the close",
      "<b>Phone dashboard</b> — an installable app with start, stop and KILL buttons, order approvals, every AI decision with its reasoning and cost, and push alerts",
-     "<b>Locked down</b> — no open ports for the app, the broker API stays on a private network, and sign-in needs a 2FA code. Risky actions ask for it again, and every owner action is in an audit log"],
-  t:["Python","FastAPI","Interactive Brokers API","Multi-model AI","Risk Management","Docker Compose","Cloudflare Tunnel","PWA"]},
+     "<b>Locked down</b> — sign-in needs a 2FA code. Risky actions ask for it again, and every owner action is in an audit log"],
+  t:["Python","FastAPI","Interactive Brokers API","Multi-model AI","Risk Management","PWA"]},
  {n:"PocketPGP",u:"",d:"Android + Windows app",c:"Offline App / Android + Windows",st:"No public link",
   big:"An offline PGP key manager for Android and Windows. Encrypt, decrypt, sign and verify text and files.",
   b:"One codebase runs on both. On Android it is an app. On Windows it is one HTML file in its own Edge window. It uses standard OpenPGP through OpenPGP.js, so it works with GnuPG. The Android app has no internet permission at all. Phone and PC sync through one encrypted file that your own cloud app moves. It has no public link.",
@@ -3915,7 +3915,7 @@ coleai:()=>openWindow({id:"coleai",title:"ColeAI",icon:IC.ai,w:660,h:560,route:"
       if(hit("atelier")) return "Atelier is Cole's personal AI studio at atelier.ciprari.ai: an installable PWA with six modes (Ask, Code, Image, Video, Ideas, Build) and models from nine providers, all behind one Cloudflare Worker that keeps the keys server-side. It has an agent with 40 tools across 9 connected services that asks for approval before it sends, posts, refunds, deploys or deletes anything, and a browser extension the agent can drive. 25 LinkedIn tester spots are open: sign in with LinkedIn at atelier.ciprari.ai and try it on paid models. My Projects has the full write-up.";
       if(hit("tuner","tunertv","android tv","google tv","fire tv","roku","webos","tizen","apple tv")) return "Tuner is a TV media player Cole built at tunertv.app. The Android TV, Google TV and Fire TV app is Kotlin, Jetpack Compose and Media3. LG and Roku install in developer mode, and Samsung and Apple TV are in progress. You drive the guide with the remote, and a phone pairs the TV by QR code. Its web platform, LumaNest TV, runs on Cloudflare Workers, D1 and R2 with PayPal checkout. My Projects has the full write-up.";
       if(hit("tma","timberlane","booster club","music booster","mytma")) return "The TMA Family App is a free phone app Cole built for the Timberlane Music Association. That is the booster club for Timberlane Regional's middle and high school music programs. It is built so families can see activity-fund balances and trip costs, ask to use funds, and pay through PayPal. The treasurer keeps working in the same Google Sheet, read by a Google Apps Script backend. It runs on test data today. Try the demo at mytma.org/?demo.";
-      if(hit("ai trader","trading bot","trading assistant","trader","trading","grok","interactive brokers","ibkr")) return "AI Trader is Cole's private trading assistant for one Interactive Brokers account. Claude and Grok must agree by default before it buys. Risk caps are written in code, and every stock entry gets a stop-loss held at the broker. Real-money orders need a server flag, a live account and a fresh 2FA code. It is personal software with no public link. My Projects has the full write-up.";
+      if(hit("ai trader","trading bot","trading assistant","trader","trading","grok","interactive brokers","ibkr")) return "AI Trader is Cole's private trading assistant for one Interactive Brokers account. Claude and Grok must agree by default before it buys. Risk caps are written in code, and every stock entry gets a stop-loss held at the broker. Each new order waits for approval by default. It is personal software with no public link. My Projects has the full write-up.";
       if(hit("pocketpgp","pgp","gpg","openpgp","gnupg","kleopatra")) return "PocketPGP is an offline PGP key manager Cole built for Android and Windows from one codebase. It encrypts, decrypts, signs and verifies text and files with standard OpenPGP. The Android app has no internet permission. Phone and PC sync keys through one encrypted file in your own cloud folder. It has no public link. My Projects has the full write-up.";
       if(hit("keep fix cut","keepfixcut","dating profile","hinge","tinder","bumble")) return "Keep Fix Cut is a free AI teardown of a Hinge, Tinder or Bumble profile at keepfixcut.com. Claude grades each photo keep, fix or cut, rewrites the prompts and ranks the fixes. Voice prompts are transcribed with Whisper on Workers AI and scored for pace and filler words. The photo editor runs in the browser and never uploads. One Cloudflare Worker serves it all. It saves no uploads or reports, and keeps anonymous usage analytics for 30 days. My Projects has the full write-up.";
       if(hit("jetdesk","meridian","flight","aviation","plane","airplane","aircraft","pilot")) return "JetDesk.AI is Cole's offline-first flight-planning PWA for a PA-46 turboprop. The entire FAA airport database ships inside one file, legs are corrected by forecast winds aloft, a fuel-stop optimizer weighs detours against price, and METAR/TAF feeds drive per-runway wind verdicts. Fuel prices logged on one phone sync to every phone behind a PIN, via Cloudflare Pages Functions. Open My Projects to see it.";
@@ -5855,7 +5855,7 @@ props:(i)=>{
       </div>
       <hr class="r95">
       <table class="lv" style="font-size:11.5px"><tbody>
-        <tr><td style="width:38%;color:#555">Type</td><td>${esc(p.c)} · production</td></tr>
+        <tr><td style="width:38%;color:#555">Type</td><td>${esc(p.c)}${p.st?"":" · production"}</td></tr>
         <tr><td style="color:#555">Status</td><td${p.st?"":` class="ok"`}>${esc(p.st||"Live")}</td></tr>
         <tr><td style="color:#555">Built by</td><td>Cole Ciprari — sole architect &amp; engineer</td></tr>
         <tr><td style="color:#555">Documented features</td><td>${p.f.length}</td></tr>

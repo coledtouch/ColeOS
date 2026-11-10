@@ -81,7 +81,7 @@ async function deployAssets(dir, headers) {
     if (up.result && up.result.jwt) completion = up.result.jwt;
   }
   const fd2 = new FormData();
-  fd2.append("metadata", JSON.stringify({ assets: { jwt: completion, config: { _headers: headers } }, compatibility_date: "2026-08-12" }));
+  fd2.append("metadata", JSON.stringify({ assets: { jwt: completion, config: { _headers: headers, not_found_handling: "404-page" } }, compatibility_date: "2026-08-12" }));
   const put = await (await fetch(`${base}/workers/scripts/coleos`, { method: "PUT", headers: auth, body: fd2 })).json();
   if (!put.success) throw new Error("deploy: " + JSON.stringify(put.errors));
   console.log(`deployed coleos: ${files.length} files, ${uploaded} uploaded`);
